@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:resource name="Incidents_getGraphList" path="/xs1/xs1-security-intelligence/api/incidents/graph/day?ruleIds={incidentID}&amp;" id="11b2a6b8-7cd7-4985-819a-f1c1bf60c02b" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="11b2a6b8-7cd7-4985-819a-f1c1bf60c02bfileName">Incidents_getGraphList</con:setting>
+  </con:settings>
+  <con:parameters>
+    <con:parameter required="true">
+      <con:name>incidentID</con:name>
+      <con:value>ruleID</con:value>
+      <con:style>TEMPLATE</con:style>
+      <con:default>ruleID</con:default>
+    </con:parameter>
+    <con:parameter required="true">
+      <con:name>X-XSRF-TOKEN</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+    <con:parameter required="true">
+      <con:name>Cookie</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+    <con:parameter required="true">
+      <con:name>gridParameters</con:name>
+      <con:value/>
+      <con:style>QUERY</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+  </con:parameters>
+  <con:method name="Incidents_getGraphList" id="5c55ca40-0021-49b7-8f99-6a6571d4186c" method="GET">
+    <con:settings/>
+    <con:parameters/>
+    <con:representation type="FAULT">
+      <con:mediaType>application/json;charset=UTF-8</con:mediaType>
+      <con:status>400</con:status>
+      <con:params/>
+      <con:element xmlns:pat="https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns">pat:Fault</con:element>
+    </con:representation>
+    <con:representation type="REQUEST">
+      <con:mediaType>application/json</con:mediaType>
+      <con:params/>
+    </con:representation>
+    <con:representation type="FAULT">
+      <con:mediaType xsi:nil="true"/>
+      <con:status>401</con:status>
+      <con:params/>
+      <con:element>data</con:element>
+    </con:representation>
+    <con:representation type="RESPONSE">
+      <con:mediaType xsi:nil="true"/>
+      <con:status>200</con:status>
+      <con:params/>
+      <con:element>data</con:element>
+    </con:representation>
+    <con:representation type="RESPONSE">
+      <con:mediaType>application/json;charset=UTF-8</con:mediaType>
+      <con:status>200</con:status>
+      <con:params/>
+      <con:element xmlns:pat="https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns">pat:Response</con:element>
+    </con:representation>
+    <con:representation type="FAULT">
+      <con:mediaType xsi:nil="true"/>
+      <con:status>401</con:status>
+      <con:params/>
+      <con:element>data</con:element>
+    </con:representation>
+    <con:representation type="FAULT">
+      <con:mediaType xsi:nil="true"/>
+      <con:status>401</con:status>
+      <con:params/>
+      <con:element>data</con:element>
+    </con:representation>
+    <con:request name="Request 1" id="75a90605-b39a-49e7-ba89-6ce272b0f0e1" mediaType="application/json">
+      <con:settings>
+        <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+      </con:settings>
+      <con:endpoint>https://xs1qa2.xypro.com</con:endpoint>
+      <con:request/>
+      <con:credentials>
+        <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+        <con:authType>No Authorization</con:authType>
+      </con:credentials>
+      <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+      <con:jmsPropertyConfig/>
+      <con:parameters>
+        <con:entry key="Cookie" value="${#Project#cookie} "/>
+        <con:entry key="gridParameters" value="%7B%22cleared%22%3A%22false%22%2C%22skip%22%3A0%2C%22sortDir%22%3A%22desc%22%2C%22sortField%22%3A%22captureDateTime%22%2C%22take%22%3A25%2C%22fromDate%22%3A%222019-03-11T16%3A42%3A22Z%22%2C%22toDate%22%3A%222019-04-11T16%3A42%3A22Z%22%2C%22filter%22%3A%7B%22logic%22%3A%22and%22%2C%22filters%22%3A%5B%5D%7D%7D"/>
+        <con:entry key="X-XSRF-TOKEN" value="${#Project#token} "/>
+        <con:entry key="incidentID" value="${#TestSuite#currentIncidentID} "/>
+      </con:parameters>
+      <con:parameterOrder>
+        <con:entry>X-XSRF-TOKEN</con:entry>
+        <con:entry>Cookie</con:entry>
+        <con:entry>gridParameters</con:entry>
+        <con:entry>incidentID</con:entry>
+      </con:parameterOrder>
+    </con:request>
+  </con:method>
+</con:resource>

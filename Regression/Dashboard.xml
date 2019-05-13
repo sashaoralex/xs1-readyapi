@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testCase id="afda5e8b-f937-4c77-a9cb-c2ca082d93c9" discardOkResults="true" failOnError="false" failTestCaseOnErrors="true" keepSession="false" name="Dashboard" searchProperties="true" timeout="0" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="afda5e8b-f937-4c77-a9cb-c2ca082d93c9fileName">Dashboard</con:setting>
+  </con:settings>
+  <con:savedRecentRuns>1</con:savedRecentRuns>
+  <con:testStep type="groovy" name="NotToAbortOnError" id="255da22d-6674-4dbd-adfd-6556b2a0e3ee">
+    <con:settings/>
+    <con:config>
+      <script>testRunner.testCase.testSuite.project.getTestSuiteList().each
+{
+   it.getTestCaseList().each
+   {
+      //Switch the parameter value to 'true' if you need to enable 'Abort on Error' option
+      it.setFailOnError(false)
+   }
+}</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Login" id="5b56465f-fa59-4e3f-8501-899477881011">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Login" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="true">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" id="75fc935a-dfe4-4f6e-9029-a1939d6e560f" name="Login = true">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="c331986e-69e1-4678-8faa-f778df0d8cdc" name="userName = xs1apiregression">
+          <con:configuration>
+            <path>$['userName']</path>
+            <content>xs1apiregression</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#Project#password}"/>
+          <con:entry key="username" value="${#Project#username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="setTokenAndCookie" id="41d1138c-14a8-489b-9afe-327e693afc7d">
+    <con:settings/>
+    <con:config>
+      <script>def val = testRunner.testCase.testSteps['Login'].testRequest.response.getResponseHeaders()
+loggedInValue = "true"
+
+Map&lt;String,List> values  = new HashMap&lt;String,String>();
+
+for(int j = 0; j &lt; val.get("Set-Cookie").size(); j++)
+{
+	
+	def cjar = val.get("Set-Cookie")[j]
+	def cookies = cjar.tokenize("\\;")
+	
+	cookies.each() 
+	{ cookie ->
+    	def pair = cookie.tokenize("\\=")
+    	values.put(pair[0], pair[1])
+    
+    		log.info( "Key: " + pair[0] + ", Val: " + pair[1] )
+	}
+}
+
+		values.keySet()
+		if (values.get("SESSION") == null)
+		{
+			loggedInValue = "false"
+		}
+		log.info("LOGGED IN: " + loggedInValue)
+		testRunner.testCase.testSuite.project.setPropertyValue("loggedIn", loggedInValue)
+		testRunner.testCase.testSuite.project.setPropertyValue( 'token', values.get("XSRF-TOKEN"))
+		testRunner.testCase.testSuite.project.setPropertyValue( 'cookie', "SESSION="+values.get("SESSION" ))
+
+		//Generate TransactionID
+		//def random = (int)(Math.random()*1000);
+          //testRunner.testCase.testSuite.project.setPropertyValue("RandomID", String.valueOf((int)(Math.random()*100000)) );</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="getTotals" id="f1cfbf60-c012-4b69-9067-1cdc188d8355">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/dashboard" methodName="getTotals" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="getTotals" id="3b998971-0b34-4a8c-98fa-9df6e5fd337d" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/dashboard</con:originalUri>
+        <con:assertion type="JsonPath Count" id="23a20d2e-ffb5-41b2-85a1-7357783e7fc9" name="totalMonitors count = 1">
+          <con:configuration>
+            <path>$['totalMonitors']</path>
+            <content>1</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error = 0" id="a09431ea-d203-48e9-a35e-a5d28c150690">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="4e5ebc45-7bc9-425e-b77f-9dfaf9969d2f">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Logout" id="98b69f07-e10d-47a6-befc-a5f0abfb035b">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/logout" methodName="logout" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Logout" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="54d91e34-56df-4305-b094-849b5fb913dc">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="outputTimesToExcel" id="41d95607-3950-4a78-b6e8-48f263394b85" disabled="true">
+    <con:settings/>
+    <con:config>
+      <script><![CDATA[import groovy. json.*
+import java.io.*;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.hssf.usermodel.*;
+import java.util.Iterator;
+
+		def projectDirectory = context.expand('${projectDir}')
+		def fileName = projectDirectory + testRunner.testCase.testSuite.project.getPropertyValue("reportsFilename")
+          log.info(fileName)
+
+		File file = new File(fileName)
+		
+		FileInputStream fsIP= new FileInputStream(file); //Read the spreadsheet that needs to be updated
+          HSSFWorkbook wb = new HSSFWorkbook(fsIP); //Access the workbook
+          HSSFSheet worksheet = wb.getSheetAt(0); //Access the worksheet, so that we can update / modify it.
+          
+		String[] steps = ["getTotals"];
+
+		//get all steps from Excel
+          HashMap<String,Integer> stepsMap=new HashMap<String,Integer>();  
+          for(int i = 1; i <= worksheet.getLastRowNum() ; i++){
+          	HSSFRow row = worksheet.getRow(i);
+			cell = row.getCell(0);
+			def stepName = cell.toString();
+               stepsMap.put(stepName,i);  
+		}
+	
+		Cell cell = null; // declare a Cell object
+		for(int i = 0; i < steps.length; i++){
+			def currentStepName = steps[i];
+			currentStepIndex = stepsMap.get(currentStepName);
+			if (currentStepIndex!=null){
+				def currentTestStep = testRunner.testCase.testSteps[currentStepName];
+				if (currentTestStep == null){
+					log.info("NOT FOUND PROJECT STEP " + currentStepName.toString());
+				}
+				else{
+					def currentTestStepResponse = currentTestStep.testRequest.response;
+					if (currentStepIndex != null && currentTestStepResponse != null){
+						def response = currentTestStep.testRequest.response.timeTaken;
+						log.info(response)
+						HSSFRow row = worksheet.getRow(currentStepIndex);
+						cell = row.getCell(9);
+						cell.setCellValue(response);
+					}
+					else{
+						log.info("NOT FOUND TIMETAKEN FOR " + currentStepName.toString());
+					}
+				}
+			}
+			else{
+				log.info("NOT FOUND STEP IN EXCEL " + currentStepName.toString());
+			}
+		}
+			
+
+		fsIP.close(); //Close the InputStream
+		FileOutputStream output_file =new FileOutputStream(file);  //Open FileOutputStream to write updates
+          wb.write(output_file); //write changes
+          output_file.close();  //close the stream]]></script>
+    </con:config>
+  </con:testStep>
+  <con:properties/>
+  <con:reportParameters/>
+  <con:breakPoints>
+    <con:testStepId>518aae63-ae56-4623-9355-2dbe214cebc0</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>255da22d-6674-4dbd-adfd-6556b2a0e3ee</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>f1cfbf60-c012-4b69-9067-1cdc188d8355</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>5b56465f-fa59-4e3f-8501-899477881011</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:environmentSpec>
+    <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:testCase>

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:resource name="Monitors_openViolationReportXLSX" path="/xs1/xs1-reports/api/policy/violation/{monitorID}/open/report/xlsx" id="e88dfeaa-6c30-4ad4-9904-24e6e7223b8a" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="e88dfeaa-6c30-4ad4-9904-24e6e7223b8afileName">Monitors_openViolationReportXLSX</con:setting>
+  </con:settings>
+  <con:parameters>
+    <con:parameter>
+      <con:name>X-XSRF-TOKEN</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+    <con:parameter>
+      <con:name>Cookie</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+    <con:parameter>
+      <con:name>monitorID</con:name>
+      <con:value>monitorID</con:value>
+      <con:style>TEMPLATE</con:style>
+      <con:default>monitorID</con:default>
+    </con:parameter>
+  </con:parameters>
+  <con:method name="openViolationReportXLSX" id="4b871d23-e6b6-4898-a26e-5c010ae29f94" method="POST">
+    <con:settings/>
+    <con:parameters/>
+    <con:representation type="RESPONSE">
+      <con:mediaType>application/x-ms-excel</con:mediaType>
+      <con:status>200</con:status>
+      <con:params/>
+      <con:element>data</con:element>
+    </con:representation>
+    <con:representation type="REQUEST">
+      <con:mediaType>application/json</con:mediaType>
+      <con:params/>
+    </con:representation>
+    <con:request name="Request 1" id="c8e7cc26-43f2-42a6-8e72-c67785fac849" mediaType="application/json" postQueryString="false">
+      <con:settings>
+        <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+      </con:settings>
+      <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+      <con:request/>
+      <con:credentials>
+        <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+        <con:authType>No Authorization</con:authType>
+      </con:credentials>
+      <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+      <con:parameters>
+        <con:entry key="Cookie" value="${#Project#cookie} "/>
+        <con:entry key="X-XSRF-TOKEN" value="${#Project#token} "/>
+      </con:parameters>
+      <con:parameterOrder>
+        <con:entry>Cookie</con:entry>
+        <con:entry>monitorID</con:entry>
+        <con:entry>X-XSRF-TOKEN</con:entry>
+      </con:parameterOrder>
+      <con:environmentSpec>
+        <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+          <con:authProfile>No Authorization</con:authProfile>
+        </con:entry>
+        <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+          <con:authProfile>Inherit From Parent</con:authProfile>
+        </con:entry>
+        <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+          <con:authProfile>Inherit From Parent</con:authProfile>
+        </con:entry>
+      </con:environmentSpec>
+    </con:request>
+    <con:environmentSpec>
+      <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+        <con:authProfile>Inherit From Parent</con:authProfile>
+      </con:entry>
+    </con:environmentSpec>
+  </con:method>
+  <con:environmentSpec>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:resource>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:resource name="Monitors_EM_GetEntityHistory" path="/xs1/api/monitor/alert/entity/{entityId}" id="c7b1168c-0a04-4e1a-8f14-30096ef474dd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="c7b1168c-0a04-4e1a-8f14-30096ef474ddfileName">Monitors_EM_GetEntityHistory</con:setting>
+  </con:settings>
+  <con:parameters>
+    <con:parameter required="true">
+      <con:name>entityId</con:name>
+      <con:value>entityId</con:value>
+      <con:style>TEMPLATE</con:style>
+      <con:default>entityId</con:default>
+    </con:parameter>
+    <con:parameter required="true">
+      <con:name>monitorId</con:name>
+      <con:value>{monitorId}</con:value>
+      <con:style>QUERY</con:style>
+      <con:default>{monitorId}</con:default>
+    </con:parameter>
+    <con:parameter required="true">
+      <con:name>X-XSRF-TOKEN</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+    <con:parameter required="true">
+      <con:name>Cookie</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+  </con:parameters>
+  <con:method name="getEntityHistory" id="450f9ea0-1e4e-4b4c-8ba5-db60c48c9503" method="GET">
+    <con:settings/>
+    <con:parameters/>
+    <con:representation type="RESPONSE">
+      <con:mediaType>application/json;charset=utf-8</con:mediaType>
+      <con:status>200</con:status>
+      <con:params/>
+      <con:element xmlns:ns="https://xs1qa2.xypro.com/xs1/api/monitor/2662">ns:Response</con:element>
+    </con:representation>
+    <con:request name="Request 1" id="c358f79b-1760-4399-8865-53fea116f1c3" mediaType="application/json">
+      <con:settings/>
+      <con:endpoint>https://xs1qa2.xypro.com</con:endpoint>
+      <con:request/>
+      <con:credentials>
+        <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+        <con:authType>No Authorization</con:authType>
+      </con:credentials>
+      <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+      <con:parameters>
+        <con:entry key="Cookie" value="${#Project#cookie}"/>
+        <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+        <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        <con:entry key="entityId" value="${#TestSuite#currentEntityID}"/>
+      </con:parameters>
+      <con:parameterOrder>
+        <con:entry>entityId</con:entry>
+        <con:entry>monitorId</con:entry>
+        <con:entry>X-XSRF-TOKEN</con:entry>
+        <con:entry>Cookie</con:entry>
+      </con:parameterOrder>
+    </con:request>
+  </con:method>
+</con:resource>

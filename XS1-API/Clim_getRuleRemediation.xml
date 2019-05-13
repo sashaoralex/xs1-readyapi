@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:resource name="Clim_getRuleRemediation" path="/xs1/xs1-clim/api/clim/remediation/{ruleId}" id="2db8cecf-4d5f-4418-b1f2-433791df0c2c" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="2db8cecf-4d5f-4418-b1f2-433791df0c2cfileName">Clim_getRuleRemediation</con:setting>
+  </con:settings>
+  <con:parameters>
+    <con:parameter>
+      <con:name>ruleId</con:name>
+      <con:value>ruleId</con:value>
+      <con:style>TEMPLATE</con:style>
+      <con:default>ruleId</con:default>
+    </con:parameter>
+    <con:parameter required="true">
+      <con:name>X-XSRF-TOKEN</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+    <con:parameter required="true">
+      <con:name>Cookie</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+  </con:parameters>
+  <con:method name="getRuleRemediation" id="6d6549f2-809f-457e-98be-6d5a766e4272" method="GET">
+    <con:settings/>
+    <con:parameters/>
+    <con:representation type="RESPONSE">
+      <con:mediaType>application/json;charset=UTF-8</con:mediaType>
+      <con:status>200</con:status>
+      <con:params/>
+      <con:element xmlns:host="https://xs1qa2.xypro.com/xs1/xs1-clim/api/clim/host">host:Response</con:element>
+    </con:representation>
+    <con:request name="Request 1" id="1db78d7c-8e29-4dbb-9bc5-12545c9ab429" mediaType="application/json">
+      <con:settings/>
+      <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+      <con:request/>
+      <con:credentials>
+        <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+        <con:authType>No Authorization</con:authType>
+      </con:credentials>
+      <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+      <con:parameters>
+        <con:entry key="Cookie" value="${#Project#cookie} "/>
+        <con:entry key="X-XSRF-TOKEN" value="${#Project#token} "/>
+        <con:entry key="ruleId" value="${#Project#currentRuleId}"/>
+      </con:parameters>
+      <con:parameterOrder>
+        <con:entry>ruleId</con:entry>
+        <con:entry>X-XSRF-TOKEN</con:entry>
+        <con:entry>Cookie</con:entry>
+      </con:parameterOrder>
+      <con:environmentSpec>
+        <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+          <con:authProfile>Inherit From Parent</con:authProfile>
+        </con:entry>
+      </con:environmentSpec>
+    </con:request>
+    <con:environmentSpec>
+      <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+        <con:authProfile>Inherit From Parent</con:authProfile>
+      </con:entry>
+    </con:environmentSpec>
+  </con:method>
+  <con:environmentSpec>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:resource>

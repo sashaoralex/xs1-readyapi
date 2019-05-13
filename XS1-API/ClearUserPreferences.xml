@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:resource name="ClearUserPreferences" path="/xs1/api/user/preference" id="9d867edc-ca37-48c4-81c9-3a75f56dcaf0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="9d867edc-ca37-48c4-81c9-3a75f56dcaf0fileName">ClearUserPreferences</con:setting>
+  </con:settings>
+  <con:parameters>
+    <con:parameter>
+      <con:name>X-XSRF-TOKEN</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+    <con:parameter>
+      <con:name>Cookie</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+  </con:parameters>
+  <con:method name="clearUserPreferences" id="9b5f4d39-229c-4956-9bb9-66c3e9a6cac8" method="DELETE">
+    <con:settings/>
+    <con:parameters/>
+    <con:representation type="RESPONSE">
+      <con:mediaType xsi:nil="true"/>
+      <con:status>200</con:status>
+      <con:params/>
+      <con:element>data</con:element>
+    </con:representation>
+    <con:representation type="REQUEST">
+      <con:mediaType>application/json</con:mediaType>
+      <con:params/>
+    </con:representation>
+    <con:representation type="RESPONSE">
+      <con:mediaType xsi:nil="true"/>
+      <con:status>200</con:status>
+      <con:params/>
+      <con:element>data</con:element>
+    </con:representation>
+    <con:representation type="RESPONSE">
+      <con:mediaType xsi:nil="true"/>
+      <con:status>200</con:status>
+      <con:params/>
+      <con:element>data</con:element>
+    </con:representation>
+    <con:request name="Request 1" id="8d1cfcb7-6f68-43e8-9a22-6dc342c15c6a" mediaType="application/json" postQueryString="false">
+      <con:settings>
+        <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+      </con:settings>
+      <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+      <con:request>{"session":{"api/monitor/3/alerts":{"grid":{"height":600,"url":"api/monitor/3/alerts?gridParameters=%7B%22sortDir%22%3A%22desc%22%2C%22sortField%22%3A%22createDateTime%22%2C%22skip%22%3A0%2C%22take%22%3A25%2C%22filter%22%3A%7B%22logic%22%3A%22and%22%2C%22filters%22%3A%5B%5D%7D%7D"},"columns":{},"rows":{},"details-pane":{"height":300,"activeTab":"Changed Attributes"},"pagination":{"currentPage":1,"itemsPerPage":25,"totalItems":12},"filters":{"filterField":"entityName"},"sorting":{}},"api/monitor/4/alerts":{"grid":{"height":600,"url":"api/monitor/4/alerts?gridParameters=%7B%22sortDir%22%3A%22desc%22%2C%22sortField%22%3A%22createDateTime%22%2C%22skip%22%3A0%2C%22take%22%3A25%2C%22filter%22%3A%7B%22logic%22%3A%22and%22%2C%22filters%22%3A%5B%7B%22field%22%3A%22entityName%22%2C%22value%22%3A%22%22%2C%22operator%22%3A%22contains%22%7D%5D%7D%7D"},"columns":{"AuditService":"53.98457583547558%"},"rows":{},"details-pane":{"height":300,"activeTab":"Changed Attributes"},"pagination":{"currentPage":1,"itemsPerPage":25,"totalItems":1},"filters":{"filterField":"entityName"},"sorting":{}}},"storage":{"api/monitor/4/alerts":{"grid":{"height":600,"url":"api/monitor/4/alerts?gridParameters=%7B%22sortDir%22%3A%22desc%22%2C%22sortField%22%3A%22createDateTime%22%2C%22skip%22%3A0%2C%22take%22%3A25%2C%22filter%22%3A%7B%22logic%22%3A%22and%22%2C%22filters%22%3A%5B%7B%22field%22%3A%22entityName%22%2C%22value%22%3A%22%22%2C%22operator%22%3A%22contains%22%7D%5D%7D%7D"},"columns":{"AuditService":"53.98457583547558%"},"rows":{},"details-pane":{"height":300,"activeTab":"Changed Attributes"},"pagination":{"currentPage":1,"itemsPerPage":25,"totalItems":1},"filters":{"filterField":"entityName"},"sorting":{}}}}</con:request>
+      <con:credentials>
+        <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+        <con:authType>No Authorization</con:authType>
+      </con:credentials>
+      <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+      <con:parameters>
+        <con:entry key="Cookie" value="${#Project#cookie)"/>
+        <con:entry key="X-XSRF-TOKEN" value="${#Project#token)"/>
+      </con:parameters>
+      <con:parameterOrder>
+        <con:entry>X-XSRF-TOKEN</con:entry>
+        <con:entry>Cookie</con:entry>
+      </con:parameterOrder>
+      <con:environmentSpec>
+        <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+          <con:authProfile>No Authorization</con:authProfile>
+        </con:entry>
+        <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+          <con:authProfile>Inherit From Parent</con:authProfile>
+        </con:entry>
+        <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+          <con:authProfile>Inherit From Parent</con:authProfile>
+        </con:entry>
+      </con:environmentSpec>
+    </con:request>
+    <con:environmentSpec>
+      <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+        <con:authProfile>Inherit From Parent</con:authProfile>
+      </con:entry>
+    </con:environmentSpec>
+  </con:method>
+  <con:environmentSpec>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:resource>

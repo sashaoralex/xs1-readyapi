@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testSuite id="054330d9-cfba-4c07-bf24-70f287b0d7d5" name="Regression Test Cases" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="054330d9-cfba-4c07-bf24-70f287b0d7d5fileName">Regression-Test-Cases</con:setting>
+  </con:settings>
+  <con:savedRecentRuns>1</con:savedRecentRuns>
+  <con:runType>SEQUENTIAL</con:runType>
+  <con:properties>
+    <con:property>
+      <con:name>Admin_username</con:name>
+      <con:value>API.Admin</con:value>
+    </con:property>
+    <con:property>
+      <con:name>Admin_password</con:name>
+      <con:value>APIAdmin123</con:value>
+    </con:property>
+    <con:property>
+      <con:name>loggedIn</con:name>
+      <con:value>false</con:value>
+    </con:property>
+    <con:property>
+      <con:name>token</con:name>
+      <con:value xsi:nil="true" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+    </con:property>
+    <con:property>
+      <con:name>cookie</con:name>
+      <con:value>SESSION=null</con:value>
+    </con:property>
+  </con:properties>
+  <con:reportParameters/>
+</con:testSuite>

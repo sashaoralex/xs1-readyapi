@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:resource name="Monitor_getMonitorSettings" path="/xs1/xs1-loader/api/monitor/{monitorId}/settings" id="07531a49-440f-48fc-868e-dd0f717f587b" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="07531a49-440f-48fc-868e-dd0f717f587bfileName">Monitor_getMonitorSettings</con:setting>
+  </con:settings>
+  <con:parameters>
+    <con:parameter>
+      <con:name>monitorId</con:name>
+      <con:value>monitorId</con:value>
+      <con:style>TEMPLATE</con:style>
+      <con:default>monitorId</con:default>
+    </con:parameter>
+    <con:parameter>
+      <con:name>X-XSRF-TOKEN</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+    <con:parameter>
+      <con:name>Cookie</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+  </con:parameters>
+  <con:method name="getMonitorSettings" id="5aadd4ef-a4b3-441d-bcb3-964722a2d36b" method="GET">
+    <con:settings/>
+    <con:parameters/>
+    <con:request name="Request 1" id="9624d147-7c5e-4624-9ac9-0b80d4be929b" mediaType="application/json">
+      <con:settings>
+        <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+      </con:settings>
+      <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+      <con:request/>
+      <con:credentials>
+        <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+        <con:authType>No Authorization</con:authType>
+      </con:credentials>
+      <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+      <con:parameters>
+        <con:entry key="Cookie" value="${#Project#cookie} "/>
+        <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+        <con:entry key="X-XSRF-TOKEN" value="${#Project#token} "/>
+      </con:parameters>
+      <con:parameterOrder>
+        <con:entry>monitorId</con:entry>
+        <con:entry>X-XSRF-TOKEN</con:entry>
+        <con:entry>Cookie</con:entry>
+      </con:parameterOrder>
+      <con:environmentSpec>
+        <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+          <con:authProfile>No Authorization</con:authProfile>
+        </con:entry>
+        <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+          <con:authProfile>Inherit From Parent</con:authProfile>
+        </con:entry>
+        <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+          <con:authProfile>Inherit From Parent</con:authProfile>
+        </con:entry>
+        <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+          <con:authProfile>No Authorization</con:authProfile>
+        </con:entry>
+        <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+          <con:authProfile>Inherit From Parent</con:authProfile>
+        </con:entry>
+        <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+          <con:authProfile>Inherit From Parent</con:authProfile>
+        </con:entry>
+      </con:environmentSpec>
+    </con:request>
+    <con:environmentSpec>
+      <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+        <con:authProfile>Inherit From Parent</con:authProfile>
+      </con:entry>
+      <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+        <con:authProfile>Inherit From Parent</con:authProfile>
+      </con:entry>
+      <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+        <con:authProfile>Inherit From Parent</con:authProfile>
+      </con:entry>
+      <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+        <con:authProfile>Inherit From Parent</con:authProfile>
+      </con:entry>
+    </con:environmentSpec>
+  </con:method>
+  <con:environmentSpec>
+    <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:resource>

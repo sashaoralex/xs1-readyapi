@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testSuite id="904ac58d-ab1f-4ed3-b1ef-63cc8037a968" name="Sasha's Create and Delete All Monitors(SF and MF)" disabled="true" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="904ac58d-ab1f-4ed3-b1ef-63cc8037a968fileName">Sasha%27s-Create-and-Delete-All-Monitors%28SF-and-MF%29</con:setting>
+  </con:settings>
+  <con:savedRecentRuns>1</con:savedRecentRuns>
+  <con:runType>SEQUENTIAL</con:runType>
+  <con:properties>
+    <con:property>
+      <con:name>currentMonitorID</con:name>
+      <con:value>375</con:value>
+    </con:property>
+  </con:properties>
+  <con:reportParameters/>
+  <con:environmentSpec>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:testSuite>

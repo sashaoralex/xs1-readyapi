@@ -1,0 +1,1717 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testCase id="38820387-3b96-4ce4-989a-9741a4d4a847" discardOkResults="true" failOnError="false" failTestCaseOnErrors="true" keepSession="false" name="Groups" searchProperties="true" timeout="0" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="38820387-3b96-4ce4-989a-9741a4d4a847fileName">Groups</con:setting>
+  </con:settings>
+  <con:savedRecentRuns>1</con:savedRecentRuns>
+  <con:testStep type="restrequest" name="Login" id="acbc38fb-2249-4f2a-9688-246dbec98b06">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Login" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="true">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" id="75fc935a-dfe4-4f6e-9029-a1939d6e560f" name="Login = true">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="c331986e-69e1-4678-8faa-f778df0d8cdc" name="userName = xs1apiregression">
+          <con:configuration>
+            <path>$['userName']</path>
+            <content>xs1apiregression</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#Project#password}"/>
+          <con:entry key="username" value="${#Project#username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="setTokenAndCookie" id="6ebe30a0-d2cf-4979-94a1-9f825c4d4800">
+    <con:settings/>
+    <con:config>
+      <script>def val = testRunner.testCase.testSteps['Login'].testRequest.response.getResponseHeaders()
+loggedInValue = "true"
+
+Map&lt;String,List> values  = new HashMap&lt;String,String>();
+
+for(int j = 0; j &lt; val.get("Set-Cookie").size(); j++)
+{
+	
+	def cjar = val.get("Set-Cookie")[j]
+	def cookies = cjar.tokenize("\\;")
+	
+	cookies.each() 
+	{ cookie ->
+    	def pair = cookie.tokenize("\\=")
+    	values.put(pair[0], pair[1])
+    
+    		log.info( "Key: " + pair[0] + ", Val: " + pair[1] )
+	}
+}
+
+		values.keySet()
+		if (values.get("SESSION") == null)
+		{
+			loggedInValue = "false"
+		}
+		log.info("LOGGED IN: " + loggedInValue)
+		testRunner.testCase.testSuite.project.setPropertyValue("loggedIn", loggedInValue)
+		testRunner.testCase.testSuite.project.setPropertyValue( 'token', values.get("XSRF-TOKEN"))
+		testRunner.testCase.testSuite.project.setPropertyValue( 'cookie', "SESSION="+values.get("SESSION" ))
+
+		//Generate TransactionID
+		//def random = (int)(Math.random()*1000);
+          //testRunner.testCase.testSuite.project.setPropertyValue("RandomID", String.valueOf((int)(Math.random()*100000)) );</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="create_group" id="543fc35c-a0c3-4046-ba10-e653f89541b9">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/group" methodName="AddAGroup" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="create_group" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request>{"group":{"groupName":"GroupAPI","groupType":"User"}}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="JsonPath Count" id="49416787-e39e-4ce4-a51d-bd92ade162a9" name="Error count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="1d44e70a-87fd-436b-bc2a-22456beba348" name="GroupName is correct">
+          <con:configuration>
+            <path>$['group']['groupName']</path>
+            <content>GroupAPI</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="MonitorId" value="${#TestSuite#currentMonitorID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="create_group_normal" id="22633e20-38e6-4633-8410-8d3594199643">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/group" methodName="AddAGroup" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="create_group_normal" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request>{"group":{"groupName":"GroupAPINormal","groupType":null}}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="JsonPath Count" id="49416787-e39e-4ce4-a51d-bd92ade162a9" name="Error count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="1d44e70a-87fd-436b-bc2a-22456beba348" name="GroupName is correct">
+          <con:configuration>
+            <path>$['group']['groupName']</path>
+            <content>GroupAPINormal</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="MonitorId" value="${#TestSuite#currentMonitorID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="saveCurrentGroupId" id="1b4229f7-5d21-4220-82c2-508916fbc3e4">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+		def response=context.expand('${create_group#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		currentID = json['group']['groupId']
+		//log.info currentID
+		def response2=context.expand('${create_group_normal#Response}')		
+		def json2 = new JsonSlurper().parseText(response2)
+		currentID2 = json2['group']['groupId']
+		testRunner.testCase.testSuite.setPropertyValue( 'currentGroupID', currentID.toString())
+				testRunner.testCase.testSuite.setPropertyValue( 'currentGroupID2', currentID2.toString())</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_group_list" id="05f76c1d-c14f-48e6-8350-39dd86c7b686">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-loader/api/monitor/group/data" methodName="getGroupList" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_group_list" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="JsonPath Count" id="49416787-e39e-4ce4-a51d-bd92ade162a9" name="Error count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="MonitorId" value="${#TestSuite#currentMonitorID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="create_monitor" id="76d39967-a368-4d8b-ae9a-feb6a3746bc3">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-loader/api/monitor/" methodName="createMonitor" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="create_monitor" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request>{
+   "monitor":{
+      "monitorId":-1,
+      "monitorName":"ApiUserMonitor1",
+      "entityTypeId":1,
+      "nodeFilters":[
+         {
+            "nodeFilter":"\\*",
+
+            "entityFilter":"qa.olgag"
+         }
+      ],
+      "analysisType":"Integrity Check",
+      "visibility":"Private",
+      "criticality":"Medium",
+      "alertSettings":{
+         "onMissing":true,
+         "onNew":true,
+         "active":true
+      },
+      "schedule":{
+         "triggerType":"Simple",
+         "startDateTime":1555039920000,
+         "repeatInterval":1,
+         "repeatUnit":"Hours"
+      },
+      "attributes":[
+         {
+            "attributeTypeId":3,
+            "attributeTypeName":"AuditAuthenticateFail",
+            "alert":true
+         },
+         {
+            "attributeTypeId":4,
+            "attributeTypeName":"AuditAuthenticatePass",
+            "alert":true
+         },
+         {
+            "attributeTypeId":5,
+            "attributeTypeName":"AuditManageFail",
+            "alert":true
+         },
+         {
+            "attributeTypeId":6,
+            "attributeTypeName":"AuditManagePass",
+            "alert":true
+         },
+         {
+            "attributeTypeId":7,
+            "attributeTypeName":"AuditUserActionFail",
+            "alert":true
+         },
+         {
+            "attributeTypeId":8,
+            "attributeTypeName":"AuditUserActionPass",
+            "alert":true
+         },
+         {
+            "attributeTypeId":10,
+            "attributeTypeName":"CiCpu",
+            "alert":true
+         },
+         {
+            "attributeTypeId":11,
+            "attributeTypeName":"CiLib",
+            "alert":true
+         },
+         {
+            "attributeTypeId":12,
+            "attributeTypeName":"CiName",
+            "alert":true
+         },
+         {
+            "attributeTypeId":13,
+            "attributeTypeName":"CiParamText",
+            "alert":true
+         },
+         {
+            "attributeTypeId":14,
+            "attributeTypeName":"CiPri",
+            "alert":true
+         },
+         {
+            "attributeTypeId":15,
+            "attributeTypeName":"CiProg",
+            "alert":true
+         },
+         {
+            "attributeTypeId":16,
+            "attributeTypeName":"CiSwap",
+            "alert":true
+         },
+         {
+            "attributeTypeId":18,
+            "attributeTypeName":"CreationTime",
+            "alert":true
+         },
+         {
+            "attributeTypeId":19,
+            "attributeTypeName":"CreatorGroupNumber",
+            "alert":true
+         },
+         {
+            "attributeTypeId":20,
+            "attributeTypeName":"CreatorLoginName",
+            "alert":true
+         },
+         {
+            "attributeTypeId":22,
+            "attributeTypeName":"CreatorNodeNumber",
+            "alert":true
+         },
+         {
+            "attributeTypeId":23,
+            "attributeTypeName":"CreatorType",
+            "alert":true
+         },
+         {
+            "attributeTypeId":24,
+            "attributeTypeName":"CreatorUserNumber",
+            "alert":true
+         },
+         {
+            "attributeTypeId":25,
+            "attributeTypeName":"DefaultSecurity",
+            "alert":true
+         },
+         {
+            "attributeTypeId":26,
+            "attributeTypeName":"DefaultSubvol",
+            "alert":true
+         },
+         {
+            "attributeTypeId":27,
+            "attributeTypeName":"DefaultVol",
+            "alert":true
+         },
+         {
+            "attributeTypeId":29,
+            "attributeTypeName":"DPAclCount",
+            "alert":true
+         },
+         {
+            "attributeTypeId":30,
+            "attributeTypeName":"DPAuditAccessFail",
+            "alert":true
+         },
+         {
+            "attributeTypeId":31,
+            "attributeTypeName":"DPAuditAccessPass",
+            "alert":true
+         },
+         {
+            "attributeTypeId":32,
+            "attributeTypeName":"DPAuditManageFail",
+            "alert":true
+         },
+         {
+            "attributeTypeId":33,
+            "attributeTypeName":"DPAuditManagePass",
+            "alert":true
+         },
+         {
+            "attributeTypeId":34,
+            "attributeTypeName":"DPOwnerGroupNumber",
+            "alert":true
+         },
+         {
+            "attributeTypeId":35,
+            "attributeTypeName":"DPOwnerUserNumber",
+            "alert":true
+         },
+         {
+            "attributeTypeId":37,
+            "attributeTypeName":"FailedLogonCount",
+            "alert":true
+         },
+         {
+            "attributeTypeId":39,
+            "attributeTypeName":"GroupNumber",
+            "alert":true
+         },
+         {
+            "attributeTypeId":41,
+            "attributeTypeName":"InitialDirectory",
+            "alert":true
+         },
+         {
+            "attributeTypeId":42,
+            "attributeTypeName":"InitialProgram",
+            "alert":true
+         },
+         {
+            "attributeTypeId":43,
+            "attributeTypeName":"InitialProgType",
+            "alert":true
+         },
+         {
+            "attributeTypeId":282,
+            "attributeTypeName":"IsAlias",
+            "alert":true
+         },
+         {
+            "attributeTypeId":44,
+            "attributeTypeName":"IsFrozen",
+            "alert":true
+         },
+         {
+            "attributeTypeId":45,
+            "attributeTypeName":"LastLogon",
+            "alert":true
+         },
+         {
+            "attributeTypeId":86,
+            "attributeTypeName":"LastModified",
+            "alert":true
+         },
+         {
+            "attributeTypeId":47,
+            "attributeTypeName":"LastUnsuccessfulAttempt",
+            "alert":true
+         },
+         {
+            "attributeTypeId":52,
+            "attributeTypeName":"OwnerGroupNumber",
+            "alert":true
+         },
+         {
+            "attributeTypeId":53,
+            "attributeTypeName":"OwnerUserNumber",
+            "alert":true
+         },
+         {
+            "attributeTypeId":54,
+            "attributeTypeName":"PasswordExpires",
+            "alert":true
+         },
+         {
+            "attributeTypeId":55,
+            "attributeTypeName":"PasswordExpiryGrace",
+            "alert":true
+         },
+         {
+            "attributeTypeId":56,
+            "attributeTypeName":"PasswordIsExpired",
+            "alert":true
+         },
+         {
+            "attributeTypeId":57,
+            "attributeTypeName":"PasswordLastChange",
+            "alert":true
+         },
+         {
+            "attributeTypeId":58,
+            "attributeTypeName":"PasswordMayChange",
+            "alert":true
+         },
+         {
+            "attributeTypeId":59,
+            "attributeTypeName":"PasswordMustChange",
+            "alert":true
+         },
+         {
+            "attributeTypeId":60,
+            "attributeTypeName":"PrimaryGroupNumber",
+            "alert":true
+         },
+         {
+            "attributeTypeId":65,
+            "attributeTypeName":"StaticFailedLogonCount",
+            "alert":true
+         },
+         {
+            "attributeTypeId":66,
+            "attributeTypeName":"StaticFailedLogonReset",
+            "alert":true
+         },
+         {
+            "attributeTypeId":67,
+            "attributeTypeName":"Status",
+            "alert":true
+         },
+         {
+            "attributeTypeId":70,
+            "attributeTypeName":"TextDescription",
+            "alert":true
+         },
+         {
+            "attributeTypeId":626,
+            "attributeTypeName":"UID",
+            "alert":true
+         },
+         {
+            "attributeTypeId":71,
+            "attributeTypeName":"UserExpires",
+            "alert":true
+         },
+         {
+            "attributeTypeId":72,
+            "attributeTypeName":"UserIsExpired",
+            "alert":true
+         },
+         {
+            "attributeTypeId":74,
+            "attributeTypeName":"UserNumber",
+            "alert":true
+         }
+      ],
+      "groups":[],
+      "policies":[
+         6,
+         39,
+         38,
+         40,
+         4,
+         5,
+         45,
+         1,
+         3,
+         2,
+         48
+      ]
+   }
+}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="JsonPath Count" id="49416787-e39e-4ce4-a51d-bd92ade162a9" name="Error count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="1d44e70a-87fd-436b-bc2a-22456beba348" name="MonitorName is correct">
+          <con:configuration>
+            <path>$['monitor']['monitorName']</path>
+            <content>ApiUserMonitor1</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="MonitorId" value="${#TestSuite#currentMonitorID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="saveCurrentMonitorId" id="d15b2af7-8c1d-46a9-8344-99ca07a5bd4c">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+		def response=context.expand('${create_monitor#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		currentID = json['monitor']['monitorId']
+		//log.info currentID
+
+		testRunner.testCase.testSuite.setPropertyValue( 'currentMonitorID', currentID.toString())</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="delay" name="Wait2" id="b0ffb563-d273-4293-9994-63c225d034b2">
+    <con:settings/>
+    <con:config>
+      <delay>5000</delay>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="add_monitor_to_group" id="37c39ebb-23ee-48bf-8c80-7c87eea8217e">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/group/{groupId}/monitor/{monitorId}/map" methodName="addMonitorToGroup" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="add_monitor_to_group" id="81eb33e6-ef3d-4575-8970-58615a6b9b0e" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/group/645/monitor/2886/map</con:originalUri>
+        <con:assertion type="JsonPath Count" id="3a0db5e4-0acc-4074-aecb-7d4c6c9deef0" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="76fabde4-94a0-41d2-9d04-8713dc59180e" name="Mapping Exists = true">
+          <con:configuration>
+            <path>$['group']['mappingExists']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="groupId" value="${#TestSuite#currentGroupID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>groupId</con:entry>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="run_monitor" id="5b1f98bd-3796-49ca-ba23-2757e774613b">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-loader/api/collection/run/{monitorId}" methodName="runMonitorNow" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="run_monitor" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="1a2d1144-138b-47a1-a0c5-90dce31aed42" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="delay" name="WaitForAlerts" id="3fbc652f-584a-4bc7-996d-fc91b2ac295c">
+    <con:settings/>
+    <con:config>
+      <delay>10000</delay>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_list_alerts_monitor" id="fb9ce9e3-e215-4fec-b181-a6021a2366c5">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-loader/api/monitor/{monitorId}/alerts" methodName="getMonitorAlerts" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_list_alerts_monitor" id="f0d13b98-a8da-4b28-9c7c-c2da41701232" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/https:/xs1qa2.xypro.com/xs1/api/monitorreport/alert</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="8f4588e7-eed4-4827-8e25-d9285b3c1d4d">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error count = 0" id="0102eab4-0f8a-4659-9e10-6bfca64395df">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" name=" items exists (JsonPath Existence Match)" id="ee9bf9c7-b37b-4db2-9d7e-4e297bd8370b">
+          <con:configuration>
+            <path>$['items']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" name=" id exists (JsonPath Existence Match)" id="d1ebd965-3f02-4f2d-be05-5e4316849a19">
+          <con:configuration>
+            <path>$['items'][0]['id']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" name="total = 3" id="fbd801b5-80fe-4fe7-a533-9ef5c5f6ed69">
+          <con:configuration>
+            <path>$['total']</path>
+            <content>3</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;cleared&quot;:false,&quot;sortDir&quot;:&quot;desc&quot;,&quot;sortField&quot;:&quot;createDateTime&quot;,&quot;skip&quot;:0,&quot;take&quot;:25,&quot;filter&quot;:{&quot;logic&quot;:&quot;and&quot;,&quot;filters&quot;:[]}}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="Accept" value="application/json, text/plain, */*"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="groupId" value="0"/>
+          <con:entry key="skip" value="0"/>
+          <con:entry key="filter" value="{&quot;logic&quot;:&quot;and&quot;,&quot;filters&quot;:[]}}"/>
+          <con:entry key="reportType" value="pdf"/>
+          <con:entry key="take" value="25"/>
+          <con:entry key="sortField" value="createDateTime"/>
+          <con:entry key="sortDir" value="desc"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry>monitorId</con:entry>
+          <con:entry>gridParameters</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_group_alerts" id="c4464a6a-c05b-41c1-8828-7b6e7809ae27">
+    <con:settings/>
+    <con:config service="XS1 API" methodName="getGroupAlerts" resourcePath="/xs1/api/group/{groupId}/alerts" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_group_alerts" id="1b23b10d-ed50-491e-bf5f-7761dc3bec96" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>https://xs1qa2.xypro.com</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/group/112/alerts</con:originalUri>
+        <con:assertion type="JsonPath Match" id="7b3a4a11-9558-4a9b-9839-44a9dbde8fa0" name="total = 3">
+          <con:configuration>
+            <path>$['total']</path>
+            <content>3</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="a17fe9e0-53d8-4fcf-9561-43cb06312c6a">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error count = 0" id="c5e256fc-ed53-4281-9ff3-cde0c8705a69">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" name=" items exists (JsonPath Existence Match)" id="c4cbcb97-b9a3-4d32-91a2-62844a90abdd">
+          <con:configuration>
+            <path>$['items']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" name=" id exists (JsonPath Existence Match)" id="c8efa0d5-b329-4956-97ea-6fb495d79929">
+          <con:configuration>
+            <path>$['items'][0]['id']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;skip&quot;:0,&quot;take&quot;:25,&quot;cleared&quot;:&quot;null&quot;,&quot;filter&quot;:{&quot;logic&quot;:&quot;and&quot;,&quot;filters&quot;:[]},&quot;sortField&quot;:&quot;createDateTime&quot;,&quot;sortDir&quot;:&quot;desc&quot;}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="groupId" value="${#TestSuite#currentGroupID}"/>
+        </con:parameters>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="CompareMonitorVsGroup" id="a794271a-f5f4-4fd1-837b-e0c60aa99c42">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+		def response1=context.expand('${get_list_alerts_monitor#Response}')		
+		def response2=context.expand('${get_group_alerts#Response}')		
+				
+		def json1 = new JsonSlurper().parseText(response1)
+		def json2 = new JsonSlurper().parseText(response2)		
+		log.info(response = json1.equals(json2))
+		return response
+		//currentID = json['monitor']['monitorId']
+		//log.info currentID
+
+	//	testRunner.testCase.testSuite.setPropertyValue( 'currentMonitorID', currentID.toString())</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="assertionteststep" name="InfoIsCorrect" id="c6873276-ea9f-4f1f-8b94-bf630ea6c202">
+    <con:settings/>
+    <con:config xsi:type="con:AssertionTestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:entry>
+        <con:id>5084c2fd-06f1-4234-ae20-3d9e134f5e9a</con:id>
+        <con:isGroup>false</con:isGroup>
+        <con:sourceId>a794271a-f5f4-4fd1-837b-e0c60aa99c42</con:sourceId>
+        <con:propertyName>result</con:propertyName>
+        <con:assertion type="Simple Equals" name="Equals" id="ba4ad65b-7169-4bb2-85cb-80a10c1d4761">
+          <con:configuration>
+            <patternText>true</patternText>
+            <caseSensitive>true</caseSensitive>
+          </con:configuration>
+        </con:assertion>
+      </con:entry>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="rename_group" id="006eb3a8-452b-4a6a-92b4-0a0fb7af4b8f">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/group/{groupId}" methodName="renameGroup" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="rename_group" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request>{"group":{"groupName":"OlgaNewGroupName"}}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="JsonPath Count" id="49416787-e39e-4ce4-a51d-bd92ade162a9" name="Error count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="6a61e602-60b9-45c3-9d5e-4eac1bab6926" name="Group Name = OlgaNewGroupName">
+          <con:configuration>
+            <path>$['group']['groupName']</path>
+            <content>OlgaNewGroupName</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="groupId" value="${#TestSuite#currentGroupID}"/>
+          <con:entry key="MonitorId" value="${#TestSuite#currentMonitorID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="remove_monitor_from_group" id="63bfa80e-cf51-4ed8-b7e4-11d4b01778b0">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/group/{groupId}/monitor/{monitorId}/remove" methodName="removeMonitorFromGroup" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="remove_monitor_from_group" id="81eb33e6-ef3d-4575-8970-58615a6b9b0e" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/group/651/monitor/2914/remove</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="a49da7e5-6f53-4179-ab86-9bc5ad24bad9" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="groupId" value="${#TestSuite#currentGroupID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>groupId</con:entry>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="clear_alerts_monitor" id="eab56b3a-1060-46c4-8f8e-ef97358e1bf0">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-loader/api/monitor/{monitorId}/alerts/clear" methodName="clearAllAlerts" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="clear_alerts_monitor" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="9317e657-e2d4-4ded-9f13-ef9533f03477">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="MonitorId" value="${#TestSuite#currentMonitorID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="delay" name="Wait" id="288f68c8-7c18-49e3-a036-761dd9e11394" disabled="true">
+    <con:settings/>
+    <con:config>
+      <delay>5000</delay>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="delete_monitor" id="a9da02b3-f901-4617-9637-b9c745a02f71">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-loader/api/monitor/{monitorId}" methodName="deleteMonitor" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="delete_monitor" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="JsonPath Count" id="49416787-e39e-4ce4-a51d-bd92ade162a9" name="Error count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="1d44e70a-87fd-436b-bc2a-22456beba348" name="MonitorId is correct">
+          <con:configuration>
+            <path>$['monitor']['monitorId']</path>
+            <content>${#TestSuite#currentMonitorID}</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="MonitorId" value="${#TestSuite#currentMonitorID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="delete_group" id="f94defaa-b24b-468e-a5a4-9263ce4ae0ec">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/group/{groupId}" methodName="deleteGroup" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="delete_group" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="JsonPath Count" id="49416787-e39e-4ce4-a51d-bd92ade162a9" name="Error count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="1d44e70a-87fd-436b-bc2a-22456beba348" name="GroupId is correct">
+          <con:configuration>
+            <path>$['group']['groupId']</path>
+            <content>${#TestSuite#currentGroupID}</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentGroupID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="groupId" value="${#TestSuite#currentGroupID}"/>
+          <con:entry key="MonitorId" value="${#TestSuite#currentMonitorID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="delete_group_normal" id="5f16e023-c9ef-4c8b-9651-3cd2b66a9525">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/group/{groupId}" methodName="deleteGroup" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="delete_group_normal" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="JsonPath Count" id="49416787-e39e-4ce4-a51d-bd92ade162a9" name="Error count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="1d44e70a-87fd-436b-bc2a-22456beba348" name="GroupId is correct">
+          <con:configuration>
+            <path>$['group']['groupId']</path>
+            <content>${#TestSuite#currentGroupID2}</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentGroupID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="groupId" value="${#TestSuite#currentGroupID2}"/>
+          <con:entry key="MonitorId" value="${#TestSuite#currentMonitorID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Logout" id="f3e7ed59-639f-47ce-9f39-ccac070e532f">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/logout" methodName="logout" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Logout" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="d0821643-0fd5-4670-b79d-4c7cea8524b4">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="outputTimesToExcel" id="aec9e793-5cb0-40a6-b3ef-d9e1ec38e5c1" disabled="true">
+    <con:settings/>
+    <con:config>
+      <script><![CDATA[import groovy. json.*
+import java.io.*;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.hssf.usermodel.*;
+import java.util.Iterator;
+
+		def projectDirectory = context.expand('${projectDir}')
+		def fileName = projectDirectory + testRunner.testCase.testSuite.project.getPropertyValue("reportsFilename")
+          log.info(fileName)
+
+		File file = new File(fileName)
+		
+		FileInputStream fsIP= new FileInputStream(file); //Read the spreadsheet that needs to be updated
+          HSSFWorkbook wb = new HSSFWorkbook(fsIP); //Access the workbook
+          HSSFSheet worksheet = wb.getSheetAt(0); //Access the worksheet, so that we can update / modify it.
+ 		
+		String[] steps = ["create_group", "get_group_list", "add_monitor_to_group", "rename_group", "remove_monitor_from_group", "delete_group"];
+
+		//get all steps from Excel
+          HashMap<String,Integer> stepsMap=new HashMap<String,Integer>();  
+          for(int i = 1; i <= worksheet.getLastRowNum() ; i++){
+          	HSSFRow row = worksheet.getRow(i);
+			cell = row.getCell(0);
+			def stepName = cell.toString();
+               stepsMap.put(stepName,i);  
+		}
+	
+		Cell cell = null; // declare a Cell object
+		for(int i = 0; i < steps.length; i++){
+			def currentStepName = steps[i];
+			currentStepIndex = stepsMap.get(currentStepName);
+			if (currentStepIndex!=null){
+				def currentTestStep = testRunner.testCase.testSteps[currentStepName];
+				if (currentTestStep == null){
+					log.info("NOT FOUND PROJECT STEP " + currentStepName.toString());
+				}
+				else{
+					def currentTestStepResponse = currentTestStep.testRequest.response;
+					if (currentStepIndex != null && currentTestStepResponse != null){
+						def response = currentTestStep.testRequest.response.timeTaken;
+						log.info(response)
+						HSSFRow row = worksheet.getRow(currentStepIndex);
+						cell = row.getCell(9);
+						cell.setCellValue(response);
+					}
+					else{
+						log.info("NOT FOUND TIMETAKEN FOR " + currentStepName.toString());
+					}
+				}
+			}
+			else{
+				log.info("NOT FOUND STEP IN EXCEL " + currentStepName.toString());
+			}
+		}		
+
+		fsIP.close(); //Close the InputStream
+		FileOutputStream output_file =new FileOutputStream(file);  //Open FileOutputStream to write updates
+          wb.write(output_file); //write changes
+          output_file.close();  //close the stream]]></script>
+    </con:config>
+  </con:testStep>
+  <con:properties/>
+  <con:reportParameters/>
+  <con:breakPoints>
+    <con:testStepId>74b516ee-01d7-4e2c-b140-cf9d16bceb68</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>5c7cd739-0e19-472d-ae75-3537f4e0dc3c</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>1b4229f7-5d21-4220-82c2-508916fbc3e4</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>37c39ebb-23ee-48bf-8c80-7c87eea8217e</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>63bfa80e-cf51-4ed8-b7e4-11d4b01778b0</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>05f76c1d-c14f-48e6-8350-39dd86c7b686</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>006eb3a8-452b-4a6a-92b4-0a0fb7af4b8f</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>eab56b3a-1060-46c4-8f8e-ef97358e1bf0</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>543fc35c-a0c3-4046-ba10-e653f89541b9</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>a9da02b3-f901-4617-9637-b9c745a02f71</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>f94defaa-b24b-468e-a5a4-9263ce4ae0ec</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>6ebe30a0-d2cf-4979-94a1-9f825c4d4800</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>b0ffb563-d273-4293-9994-63c225d034b2</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>288f68c8-7c18-49e3-a036-761dd9e11394</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>76d39967-a368-4d8b-ae9a-feb6a3746bc3</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>d15b2af7-8c1d-46a9-8344-99ca07a5bd4c</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>acbc38fb-2249-4f2a-9688-246dbec98b06</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>c4464a6a-c05b-41c1-8828-7b6e7809ae27</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>5b1f98bd-3796-49ca-ba23-2757e774613b</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>fb9ce9e3-e215-4fec-b181-a6021a2366c5</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>3fbc652f-584a-4bc7-996d-fc91b2ac295c</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>a794271a-f5f4-4fd1-837b-e0c60aa99c42</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>c6873276-ea9f-4f1f-8b94-bf630ea6c202</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>22633e20-38e6-4633-8410-8d3594199643</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>5f16e023-c9ef-4c8b-9651-3cd2b66a9525</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:environmentSpec>
+    <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:testCase>

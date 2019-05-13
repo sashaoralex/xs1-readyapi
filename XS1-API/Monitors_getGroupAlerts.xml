@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:resource name="Monitors_getGroupAlerts" path="/xs1/api/group/{groupId}/alerts" id="3db8c730-c867-45c6-9258-2635d31e4ce4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="3db8c730-c867-45c6-9258-2635d31e4ce4fileName">Monitors_getGroupAlerts</con:setting>
+  </con:settings>
+  <con:parameters>
+    <con:parameter required="true">
+      <con:name>gridParameters</con:name>
+      <con:value>{"skip":0,"take":25,"cleared":"null","filter":{"logic":"and","filters":[]},"sortField":"createDateTime","sortDir":"desc"}</con:value>
+      <con:style>QUERY</con:style>
+      <con:default>{"skip":0,"take":25,"cleared":"null","filter":{"logic":"and","filters":[]},"sortField":"createDateTime","sortDir":"desc"}</con:default>
+    </con:parameter>
+    <con:parameter>
+      <con:name>groupId</con:name>
+      <con:value/>
+      <con:style>TEMPLATE</con:style>
+      <con:default/>
+    </con:parameter>
+  </con:parameters>
+  <con:method name="getGroupAlerts" id="5ce9da55-c906-413a-b10d-cf544f3a6271" method="GET">
+    <con:settings/>
+    <con:parameters>
+      <con:parameter required="true">
+        <con:name>X-XSRF-TOKEN</con:name>
+        <con:value/>
+        <con:style>HEADER</con:style>
+        <con:default/>
+      </con:parameter>
+      <con:parameter required="true">
+        <con:name>Cookie</con:name>
+        <con:value/>
+        <con:style>HEADER</con:style>
+        <con:default/>
+      </con:parameter>
+    </con:parameters>
+    <con:representation type="RESPONSE">
+      <con:mediaType>application/json;charset=UTF-8</con:mediaType>
+      <con:status>200</con:status>
+      <con:params/>
+      <con:element xmlns:aler="https://xs1qa2.xypro.com/xs1/api/group/112/alerts">aler:Response</con:element>
+    </con:representation>
+    <con:request name="Request 1" id="2fa9ac30-c7c7-43ae-ab6d-0bc39795cbf7" mediaType="application/json">
+      <con:settings/>
+      <con:endpoint>https://xs1qa2.xypro.com</con:endpoint>
+      <con:request/>
+      <con:credentials>
+        <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+        <con:authType>No Authorization</con:authType>
+      </con:credentials>
+      <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+      <con:parameters>
+        <con:entry key="Cookie" value="${#Project#cookie} "/>
+        <con:entry key="X-XSRF-TOKEN" value="${#Project#token} "/>
+        <con:entry key="groupId" value="${#TestSuite#currentGroupID}"/>
+      </con:parameters>
+      <con:parameterOrder>
+        <con:entry>gridParameters</con:entry>
+        <con:entry>groupId</con:entry>
+        <con:entry>X-XSRF-TOKEN</con:entry>
+        <con:entry>Cookie</con:entry>
+      </con:parameterOrder>
+    </con:request>
+  </con:method>
+</con:resource>

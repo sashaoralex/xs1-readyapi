@@ -1,0 +1,885 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testCase id="3839a27d-0eba-481f-aa25-1e28a4bd12e0" discardOkResults="false" failOnError="false" failTestCaseOnErrors="true" keepSession="false" name="XS1-3979, XS1-4049" searchProperties="true" timeout="0" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="3839a27d-0eba-481f-aa25-1e28a4bd12e0fileName">XS1-3979%2C-XS1-4049</con:setting>
+  </con:settings>
+  <con:savedRecentRuns>1</con:savedRecentRuns>
+  <con:testStep type="restrequest" name="Admin Login" id="275e8640-16ab-40c2-b893-1e6f0298a91d">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Admin Login" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="true">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" id="75fc935a-dfe4-4f6e-9029-a1939d6e560f" name="Login = true">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="c331986e-69e1-4678-8faa-f778df0d8cdc" name="userName = xs1apiregression">
+          <con:configuration>
+            <path>$['userName']</path>
+            <content>API.Admin</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#TestSuite#Admin_password}"/>
+          <con:entry key="username" value="${#TestSuite#Admin_username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="setTokenAndCookie" id="c5490cda-8a1c-4801-b210-55ef4e8c6eb1">
+    <con:settings/>
+    <con:config>
+      <script>def val = testRunner.testCase.testSteps['Admin Login'].testRequest.response.getResponseHeaders()
+loggedInValue = "true"
+
+Map&lt;String,List> values  = new HashMap&lt;String,String>();
+
+for(int j = 0; j &lt; val.get("Set-Cookie").size(); j++)
+{
+	
+	def cjar = val.get("Set-Cookie")[j]
+	def cookies = cjar.tokenize("\\;")
+	
+	cookies.each() 
+	{ cookie ->
+    	def pair = cookie.tokenize("\\=")
+    	values.put(pair[0], pair[1])
+    
+    		log.info( "Key: " + pair[0] + ", Val: " + pair[1] )
+	}
+}
+
+		values.keySet()
+		if (values.get("SESSION") == null)
+		{
+			loggedInValue = "false"
+		}
+		log.info("LOGGED IN: " + loggedInValue)
+		testRunner.testCase.testSuite.setPropertyValue("loggedIn", loggedInValue)
+		testRunner.testCase.testSuite.setPropertyValue( 'token', values.get("XSRF-TOKEN"))
+		testRunner.testCase.testSuite.setPropertyValue( 'cookie', "SESSION="+values.get("SESSION" ))
+
+		//Generate TransactionID
+		//def random = (int)(Math.random()*1000);
+          //testRunner.testCase.testSuite.project.setPropertyValue("RandomID", String.valueOf((int)(Math.random()*100000)) );</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Change Lockout Settings" id="b5f6ce32-d16f-40f2-b898-34f92f5ec059">
+    <con:settings/>
+    <con:config service="XS1 API" methodName="changeLockoutConfig" resourcePath="/xs1/api/admin/users/config/lockout" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Change Lockout Settings" id="ea576fc6-2057-4695-b7f6-e5f4449d1912" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>https://xs1qa2.xypro.com</con:endpoint>
+        <con:request>{"failCount":"3","failWindow":3,"failWindowInterval":"Hours"}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/users/config/lockout</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="31f835be-3e76-4b50-a538-96622f5cf646">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#TestSuite#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#TestSuite#token}"/>
+        </con:parameters>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Logout" id="4ed3c2ce-3867-4c15-8a27-0c34d9cc3020">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/logout" methodName="logout" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Logout" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="1ee1c108-2e0d-4880-857a-396552f3d597" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Copy of Valid HTTP Status Code = 200" id="9fe4aff7-4054-4b09-a1bc-8dd7b46ec3c8">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#TestSuite#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#TestSuite#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Failed Login 1" id="0e140a9a-e81c-4332-9f68-6a3e24408c93">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Failed Login 1" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="true">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" id="df78f3b7-44a1-4bff-9c3c-8ce0bc2aae73" name="message = Invalid username or password">
+          <con:configuration>
+            <path>$['message']</path>
+            <content>Invalid username or password</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="ec168144-fd27-445a-831a-f8a6b52c6e1a" name="login = false">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>false</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#TestCase#Lockout_incorrectPassword}"/>
+          <con:entry key="username" value="${#TestCase#Lockout_username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Failed Login 2" id="4f351b16-2add-4c59-9934-bf4b780cdf9b">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Failed Login 2" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" name="message = Invalid username or password" id="5ea9d2b1-acfc-43e4-9308-24681bc33b6e">
+          <con:configuration>
+            <path>$['message']</path>
+            <content>Invalid username or password</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" name="login = false" id="73f9af7c-6fd8-42da-8749-a93407eb1e57">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>false</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#TestCase#Lockout_incorrectPassword}"/>
+          <con:entry key="username" value="${#TestCase#Lockout_username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Failed Login 3" id="3763f083-253a-47df-93b8-aa36aabd9010">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Failed Login 3" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" name="message = Invalid username or password" id="a7bf5b59-45eb-43bb-a308-e4767c0b6925">
+          <con:configuration>
+            <path>$['message']</path>
+            <content>Invalid username or password</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" name="login = false" id="6a50f6f8-4ed5-4227-8556-aaaf5dabd58d">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>false</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#TestCase#Lockout_incorrectPassword}"/>
+          <con:entry key="username" value="${#TestCase#Lockout_username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Correct Info After Locked" id="30daed27-0d15-41ee-800b-55e944c2614f">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Correct Info After Locked" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" name="login = false" id="bbba2b35-5c22-4333-aeab-d00e49e5f6cb">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>false</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="bda722bd-ee87-4fb1-8f77-f3c4a2fd4b87" name="message = You have exceeded the number of login attempts allowed. Please contact your XS1 System Administrator.">
+          <con:configuration>
+            <path>$['message']</path>
+            <content>You have exceeded the number of login attempts allowed. Please contact your XS1 System Administrator.</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#TestCase#Lockout_password}"/>
+          <con:entry key="username" value="${#TestCase#Lockout_username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Admin Login2" id="bb5139c1-ffd9-4871-a0b8-0975e42a2d50">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Admin Login2" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="true">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" id="75fc935a-dfe4-4f6e-9029-a1939d6e560f" name="Login = true">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="c331986e-69e1-4678-8faa-f778df0d8cdc" name="userName = xs1apiregression">
+          <con:configuration>
+            <path>$['userName']</path>
+            <content>API.Admin</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#TestSuite#Admin_password}"/>
+          <con:entry key="username" value="${#TestSuite#Admin_username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="setTokenAndCookie2" id="efbf646f-af5b-47c6-9a66-cce54df009e1">
+    <con:settings/>
+    <con:config>
+      <script>def val = testRunner.testCase.testSteps['Admin Login2'].testRequest.response.getResponseHeaders()
+loggedInValue = "true"
+
+Map&lt;String,List> values  = new HashMap&lt;String,String>();
+
+for(int j = 0; j &lt; val.get("Set-Cookie").size(); j++)
+{
+	
+	def cjar = val.get("Set-Cookie")[j]
+	def cookies = cjar.tokenize("\\;")
+	
+	cookies.each() 
+	{ cookie ->
+    	def pair = cookie.tokenize("\\=")
+    	values.put(pair[0], pair[1])
+    
+    		log.info( "Key: " + pair[0] + ", Val: " + pair[1] )
+	}
+}
+
+		values.keySet()
+		if (values.get("SESSION") == null)
+		{
+			loggedInValue = "false"
+		}
+		log.info("LOGGED IN: " + loggedInValue)
+		testRunner.testCase.testSuite.setPropertyValue("loggedIn", loggedInValue)
+		testRunner.testCase.testSuite.setPropertyValue( 'token', values.get("XSRF-TOKEN"))
+		testRunner.testCase.testSuite.setPropertyValue( 'cookie', "SESSION="+values.get("SESSION" ))
+
+		//Generate TransactionID
+		//def random = (int)(Math.random()*1000);
+          //testRunner.testCase.testSuite.project.setPropertyValue("RandomID", String.valueOf((int)(Math.random()*100000)) );</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Unlock User" id="084a6955-9c05-4bb1-b984-278b344cd981">
+    <con:settings/>
+    <con:config service="XS1 API" methodName="modifyUser" resourcePath="/xs1/api/users/" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Unlock User" id="45a9b1a8-940c-4669-8eff-dc100704f7aa" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>https://xs1qa2.xypro.com</con:endpoint>
+        <con:request>{"userId":28,"userName":"API.Lockout","firstName":"API","lastName":"Lockout","userEmailId":"dmitry.pasikov@xypro.com","roles":["Super User"],"lastPasswordSetDateTime":null,"loginCreationDateTime":null,"loginModificationDateTime":null,"loginRowCreatedUserId":0,"loginLastModifiedUserId":0,"userRoleCreationDateTime":null,"userRoleModificationDateTime":null,"userRoleCreatedUserId":0,"userRoleModifiedUserId":0,"emailNotificationEnabled":false,"locked":false,"active":true}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/users/</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="bb0fb31d-c61a-4398-b1a3-72e2c0341ccf" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#TestSuite#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#TestSuite#token}"/>
+        </con:parameters>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Change Lockout Settings to Default" id="4c7cd860-58dd-4e4d-926c-abecfc01cd6c">
+    <con:settings/>
+    <con:config service="XS1 API" methodName="changeLockoutConfig" resourcePath="/xs1/api/admin/users/config/lockout" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Change Lockout Settings to Default" id="ea576fc6-2057-4695-b7f6-e5f4449d1912" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:encoding>UTF-8</con:encoding>
+        <con:endpoint>https://xs1qa2.xypro.com</con:endpoint>
+        <con:request>{"failCount":"99","failWindow":3,"failWindowInterval":"Hours"}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/users/config/lockout</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="3c1c8271-ac88-483c-86f2-cbb334852cb3">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#TestSuite#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#TestSuite#token}"/>
+        </con:parameters>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Logout2" id="4b8946b0-f86c-4a8d-b4d3-555e077df86e">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/logout" methodName="logout" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Logout2" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="1ee1c108-2e0d-4880-857a-396552f3d597" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Copy of Valid HTTP Status Code = 200" id="9fe4aff7-4054-4b09-a1bc-8dd7b46ec3c8">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#TestSuite#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#TestSuite#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Correct Info After Unlocked" id="4fbde5c6-fce7-40bd-a969-9714821185d1">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Correct Info After Unlocked" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" id="02e1fff1-ee3e-476f-8ffd-71ca53c50392" name="login = true">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="c1f32b96-04ae-40e9-bf35-a5c13532f016" name="userName = API.Lockout">
+          <con:configuration>
+            <path>$['userName']</path>
+            <content>API.Lockout</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#TestCase#Lockout_password}"/>
+          <con:entry key="username" value="${#TestCase#Lockout_username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="setTokenAndCookie3" id="102603ed-b902-4d47-b64b-f68fa890f8c1">
+    <con:settings/>
+    <con:config>
+      <script>def val = testRunner.testCase.testSteps['Correct Info After Unlocked'].testRequest.response.getResponseHeaders()
+loggedInValue = "true"
+
+Map&lt;String,List> values  = new HashMap&lt;String,String>();
+
+for(int j = 0; j &lt; val.get("Set-Cookie").size(); j++)
+{
+	
+	def cjar = val.get("Set-Cookie")[j]
+	def cookies = cjar.tokenize("\\;")
+	
+	cookies.each() 
+	{ cookie ->
+    	def pair = cookie.tokenize("\\=")
+    	values.put(pair[0], pair[1])
+    
+    		log.info( "Key: " + pair[0] + ", Val: " + pair[1] )
+	}
+}
+
+		values.keySet()
+		if (values.get("SESSION") == null)
+		{
+			loggedInValue = "false"
+		}
+		log.info("LOGGED IN: " + loggedInValue)
+		testRunner.testCase.testSuite.setPropertyValue("loggedIn", loggedInValue)
+		testRunner.testCase.testSuite.setPropertyValue( 'token', values.get("XSRF-TOKEN"))
+		testRunner.testCase.testSuite.setPropertyValue( 'cookie', "SESSION="+values.get("SESSION" ))
+
+		//Generate TransactionID
+		//def random = (int)(Math.random()*1000);
+          //testRunner.testCase.testSuite.project.setPropertyValue("RandomID", String.valueOf((int)(Math.random()*100000)) );</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Logout3" id="ab75decc-1a69-423b-a704-0db778afa532">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/logout" methodName="logout" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Logout3" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="1ee1c108-2e0d-4880-857a-396552f3d597" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Copy of Valid HTTP Status Code = 200" id="9fe4aff7-4054-4b09-a1bc-8dd7b46ec3c8">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#TestSuite#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#TestSuite#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:properties>
+    <con:property>
+      <con:name>Lockout_username</con:name>
+      <con:value>API.Lockout</con:value>
+    </con:property>
+    <con:property>
+      <con:name>Lockout_incorrectPassword</con:name>
+      <con:value>API.Lockout</con:value>
+    </con:property>
+    <con:property>
+      <con:name>Lockout_password</con:name>
+      <con:value>APILockout123</con:value>
+    </con:property>
+  </con:properties>
+  <con:reportParameters/>
+  <con:breakPoints>
+    <con:testStepId>b5f6ce32-d16f-40f2-b898-34f92f5ec059</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>275e8640-16ab-40c2-b893-1e6f0298a91d</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>c5490cda-8a1c-4801-b210-55ef4e8c6eb1</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>4ed3c2ce-3867-4c15-8a27-0c34d9cc3020</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>bb5139c1-ffd9-4871-a0b8-0975e42a2d50</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>efbf646f-af5b-47c6-9a66-cce54df009e1</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>30daed27-0d15-41ee-800b-55e944c2614f</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>084a6955-9c05-4bb1-b984-278b344cd981</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+</con:testCase>

@@ -1,0 +1,2520 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testCase id="1100b061-ac21-4d84-9cf9-859c771dc10d" discardOkResults="true" failOnError="false" failTestCaseOnErrors="true" keepSession="false" name="Admin Console" searchProperties="true" timeout="0" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="1100b061-ac21-4d84-9cf9-859c771dc10dfileName">Admin-Console</con:setting>
+  </con:settings>
+  <con:savedRecentRuns>1</con:savedRecentRuns>
+  <con:testStep type="groovy" name="NotToAbortOnError" id="e667eed7-46eb-4708-9a8e-f37eb30aac2d">
+    <con:settings/>
+    <con:config>
+      <script>testRunner.testCase.testSuite.project.getTestSuiteList().each
+{
+   it.getTestCaseList().each
+   {
+      //Switch the parameter value to 'true' if you need to enable 'Abort on Error' option
+      it.setFailOnError(false)
+   }
+}</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Login" id="8a4c27c6-bdbe-421e-8a8f-52413f3c7d23">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Login" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="true">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" id="75fc935a-dfe4-4f6e-9029-a1939d6e560f" name="Login = true">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="c331986e-69e1-4678-8faa-f778df0d8cdc" name="userName = xs1apiregression">
+          <con:configuration>
+            <path>$['userName']</path>
+            <content>xs1apiregression</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#Project#password}"/>
+          <con:entry key="username" value="${#Project#username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="setTokenAndCookie" id="23e3491d-2dd1-4c01-a3b2-a6838396e61a">
+    <con:settings/>
+    <con:config>
+      <script>def val = testRunner.testCase.testSteps['Login'].testRequest.response.getResponseHeaders()
+loggedInValue = "true"
+
+Map&lt;String,List> values  = new HashMap&lt;String,String>();
+
+for(int j = 0; j &lt; val.get("Set-Cookie").size(); j++)
+{
+	
+	def cjar = val.get("Set-Cookie")[j]
+	def cookies = cjar.tokenize("\\;")
+	
+	cookies.each() 
+	{ cookie ->
+    	def pair = cookie.tokenize("\\=")
+    	values.put(pair[0], pair[1])
+    
+    		log.info( "Key: " + pair[0] + ", Val: " + pair[1] )
+	}
+}
+
+		values.keySet()
+		if (values.get("SESSION") == null)
+		{
+			loggedInValue = "false"
+		}
+		log.info("LOGGED IN: " + loggedInValue)
+		testRunner.testCase.testSuite.project.setPropertyValue("loggedIn", loggedInValue)
+		testRunner.testCase.testSuite.project.setPropertyValue( 'token', values.get("XSRF-TOKEN"))
+		testRunner.testCase.testSuite.project.setPropertyValue( 'cookie', "SESSION="+values.get("SESSION" ))
+
+		//Generate TransactionID
+		//def random = (int)(Math.random()*1000);
+          //testRunner.testCase.testSuite.project.setPropertyValue("RandomID", String.valueOf((int)(Math.random()*100000)) );</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_email_config_info" id="529c6425-d19c-47c9-ae55-2ccb6faf5a21">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/emailconfig/1" methodName="getEmailConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_email_config_info" id="0a400dca-6bd7-4c87-a32b-fa8b876e8bdb" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/emailconfig/</con:originalUri>
+        <con:assertion type="JsonPath Count" id="5b4034f0-9091-4404-a7ed-138896c255c6" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="8ca9d681-58a7-40cc-aeed-f30f55d7dbc1" name="EmailServerPort = 25">
+          <con:configuration>
+            <path>$['emailServerPort']</path>
+            <content>25</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="f49a3bbc-7b36-4b79-88a4-ee49cc66a6ae">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="deactivate_email_notif" id="18742b24-786b-4632-a648-389f450b9ea0">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/emailconfig/1/active/false" methodName="deactivateEmailNotifications" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="deactivate_email_notif" id="0a400dca-6bd7-4c87-a32b-fa8b876e8bdb" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/</con:originalUri>
+        <con:assertion type="Simple NotContains" id="1754a7b5-9260-442a-b103-8e2c3c6fd415" name="Does Not Contain Error">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="a188f098-bfe1-4587-a8ed-a3b34f5ce166">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="confirm_email_is_deactivated" id="963fb25f-1c0b-450d-995a-ce924f330992">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/emailconfig/1" methodName="getEmailConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="confirm_email_is_deactivated" id="0a400dca-6bd7-4c87-a32b-fa8b876e8bdb" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/emailconfig/</con:originalUri>
+        <con:assertion type="JsonPath Match" id="d4d93704-01aa-445a-a56a-94792ccecb1e" name="Active = false">
+          <con:configuration>
+            <path>[active]</path>
+            <content>false</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="2f025af1-3801-47d3-8b5d-47ae1a2f4ba9">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="61e41178-0ca6-49a9-b991-f871be732e6a">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="8f46dc2c-8cef-47cf-869b-e21638e4b215">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="activate_email_notif" id="979d5a20-bae7-43cb-b5bb-a429d1986774">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/emailconfig/1/active/true" methodName="activateEmailNotifications" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="activate_email_notif" id="0a400dca-6bd7-4c87-a32b-fa8b876e8bdb" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/</con:originalUri>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="b77a3088-5ba0-4b8e-bf28-a50bf723147c">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="08e4be95-7af8-4fdd-9d67-840514f34658">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="confirm_email_is_activated" id="36155266-8767-4be4-b994-28ea55c5cb2a">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/emailconfig/1" methodName="getEmailConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="confirm_email_is_activated" id="0a400dca-6bd7-4c87-a32b-fa8b876e8bdb" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/emailconfig/</con:originalUri>
+        <con:assertion type="JsonPath Match" id="d4d93704-01aa-445a-a56a-94792ccecb1e" name="Active = True">
+          <con:configuration>
+            <path>$['active']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="520aebc3-edba-4bb6-bf9a-70364e270034">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="69518567-a798-43a3-b8c5-e9014c4378ca">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="update_XMA_config DONOTACTIVATE" id="e80a5252-21f3-4f15-b335-51a8a26f7e10" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-notification/api/xma/applicationconfig" methodName="updateXMAConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="update_XMA_config DONOTACTIVATE" id="b5063ce5-1a8f-461c-bc34-1157c4990284" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{"protocol":"TCP","port":778}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/nonstop/credentials</con:originalUri>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="35336de7-d8fa-4b8a-a7df-ee89409f0905">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="confirm_XMA_info_changed DONOTACTIVATE" id="95e1c4f4-5801-414e-adee-126de5348678" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-notification/api/xma/applicationconfig" methodName="getXMAConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="confirm_XMA_info_changed DONOTACTIVATE" id="0a400dca-6bd7-4c87-a32b-fa8b876e8bdb" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/emailconfig/</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="b6be84de-d6c3-4aef-924b-e4cfe031aba3" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="ccd3990b-08d0-4341-8afb-a3694a4069c6" name="Protocol = TCP">
+          <con:configuration>
+            <path>$['protocol']</path>
+            <content>TCP</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="6da28ab0-f914-4845-95d2-de23852aeae7">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="update_XMA_config_correct DONOTACTIVATE" id="a2e98622-0de8-4c58-97e8-35cff799fb8b" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-notification/api/xma/applicationconfig" methodName="updateXMAConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="update_XMA_config_correct DONOTACTIVATE" id="b5063ce5-1a8f-461c-bc34-1157c4990284" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa2.xypro.com</con:endpoint>
+        <con:request>{"protocol":"UDP","port":514}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/nonstop/credentials</con:originalUri>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="620c1c3e-249b-4f2c-bbec-25c668651194">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="confirm_XMA_info_correctDONOTACTIVATE" id="c589516e-f741-4cf8-90d6-baf091971fa1" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-notification/api/xma/applicationconfig" methodName="getXMAConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="confirm_XMA_info_correctDONOTACTIVATE" id="0a400dca-6bd7-4c87-a32b-fa8b876e8bdb" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/emailconfig/</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="b6be84de-d6c3-4aef-924b-e4cfe031aba3" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="1d058935-3ebb-4b0d-9039-71eb9384d5c1" name="Protocol = TCP">
+          <con:configuration>
+            <path>$['protocol']</path>
+            <content>UDP</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="fbcaae0e-e912-4e21-a449-d86d37e07878">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_XTR_config_infoDONOTACTIVATE" id="4b257913-e353-4ad2-8c1e-936bad9a90db" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/nonstop/credentials" methodName="getXTRConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_XTR_config_infoDONOTACTIVATE" id="0a400dca-6bd7-4c87-a32b-fa8b876e8bdb" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/emailconfig/</con:originalUri>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="a1d7e398-e98d-419a-acfc-e9dd4d72b586">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="bc9512d9-9bb1-4314-bdec-9bfda8f74038" name="Check for existence of [portNumber]">
+          <con:configuration>
+            <path>$['portNumber']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="update_XTR_configDONOTACTIVATE" id="0a7c5e95-e2ba-46f4-8d23-5c7fd1580c9b" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/nonstop/credentials" methodName="updateXTRConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="update_XTR_configDONOTACTIVATE" id="b5063ce5-1a8f-461c-bc34-1157c4990284" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{  
+   "userName":"tesla.owner12",
+   "nonStopPassword":null,
+   "hostIp":"10.1.1.141",
+   "portNumber":22226,
+   "hasPassword":true,
+   "confirmPassword":null
+}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/nonstop/credentials</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="09a40026-a12a-4cf8-8dd7-cb6521774277" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="4ba316fe-4a74-4d87-bcef-42585de36331">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="confirm_XTR_changedDONOTACTIVATE" id="581f30ef-dc93-4586-9c40-8e74ede7a160" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/nonstop/credentials" methodName="getXTRConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="confirm_XTR_changedDONOTACTIVATE" id="0a400dca-6bd7-4c87-a32b-fa8b876e8bdb" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/emailconfig/</con:originalUri>
+        <con:assertion type="JsonPath Match" id="c641fa1d-6204-4906-90d7-7d136834c784" name="User Name = tesla.owner12">
+          <con:configuration>
+            <path>$['userName']</path>
+            <content>tesla.owner12</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="c403afe9-4107-4ab2-a0df-79720ed1ee78">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="update_XTR_config_correctDONOTACTIVATE" id="645b2450-f28b-468d-8c45-e7949cca058d" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/nonstop/credentials" methodName="updateXTRConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="update_XTR_config_correctDONOTACTIVATE" id="b5063ce5-1a8f-461c-bc34-1157c4990284" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{  
+   "userName":"tesla.owner",
+   "nonStopPassword":null,
+   "hostIp":"10.1.1.141",
+   "portNumber":22226,
+   "hasPassword":true,
+   "confirmPassword":null
+}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/nonstop/credentials</con:originalUri>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="60ae4867-8dce-457a-9de1-a76547b5175d">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="confirm_XTR_correctDONOTACTIVATE" id="23c8e667-b5ff-4fab-b8cc-8266ddfe7d87" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/nonstop/credentials" methodName="getXTRConfig" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="confirm_XTR_correctDONOTACTIVATE" id="0a400dca-6bd7-4c87-a32b-fa8b876e8bdb" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/emailconfig/</con:originalUri>
+        <con:assertion type="JsonPath Match" id="c641fa1d-6204-4906-90d7-7d136834c784" name="User Name = tesla.owner">
+          <con:configuration>
+            <path>$['userName']</path>
+            <content>tesla.owner</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="9fd7ca02-3eac-454f-96f2-100631d6b394">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_user_list" id="9db6466b-d0c1-480b-8ada-f64ab9b56758">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/users" methodName="getUserList" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_user_list" id="a219c4f9-8d12-4299-932e-1e632ac87e6c" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/users</con:originalUri>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="8ad790a3-bc9e-4c0b-96c1-27f97c8883ca">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="getUserId" id="920425e3-3b33-4140-bbae-50e360c849a0">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+		def response=context.expand('${get_user_list#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		currentUserId = json[0]['userId']
+		//log.info currentEntityID
+		log.info(currentUserId.toString())
+		testRunner.testCase.testSuite.project.setPropertyValue('currentUserId', currentUserId.toString())</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="activate_user" id="bc5a43e4-e1f1-43d7-8ba6-7d9e0c3348ed">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/users/{userid}/active" methodName="activateUser" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="activate_user" id="c42c312c-b9b2-4f68-a169-31be13b0ff79" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{  
+   "userId":${#Project#currentUserId},
+   "active":true
+}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/users/213/active</con:originalUri>
+        <con:assertion type="JsonPath Match" id="39174fd2-abbd-4a60-966f-6638b8df0b25" name="Active = True">
+          <con:configuration>
+            <path>$['active']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="8aad3f73-6792-4ade-814b-fce7f7e0dde6">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="b8fbb102-bd6a-4a42-aa12-41feb1064d50" name="User is active">
+          <con:configuration>
+            <path>$['active']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="userid" value="${#Project#currentUserId}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>Cookie</con:entry>
+          <con:entry>userid</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="activate_user_email_notif" id="0deecaf8-8219-43f3-b915-285ea149da91">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/users/" methodName="modifyUser" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="activate_user_email_notif" id="c42c312c-b9b2-4f68-a169-31be13b0ff79" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{  
+   "userId":${#Project#currentUserId},
+   "roles":["Administrator"],
+   "emailNotificationEnabled":true
+
+}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/users/213/active</con:originalUri>
+        <con:assertion type="JsonPath Match" id="a9a166ec-d8e4-4f22-9275-65d7c2856cc6" name="Previous emailNotificationEnabled = false">
+          <con:configuration>
+            <path>$['emailNotificationEnabled']</path>
+            <content>false</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="38031338-66ea-478e-863b-5bfbc1df27e6">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="X-XSRF_TOKEN" value="${#Project#token}"/>
+          <con:entry key="userid" value="213"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>Cookie</con:entry>
+          <con:entry>userid</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="deactivate_user_email_notif" id="70f4573d-b89f-4448-ae68-170b9255ef33">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/users/" methodName="modifyUser" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="deactivate_user_email_notif" id="c42c312c-b9b2-4f68-a169-31be13b0ff79" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{
+	"userId":${#Project#currentUserId},
+	"roles":["Administrator"],
+	"emailNotificationEnabled":false
+}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/users/213/active</con:originalUri>
+        <con:assertion type="JsonPath Match" id="445ead45-70a1-40e9-b5de-91a93a41ecef" name="Previous emailNotificationEnabled = true">
+          <con:configuration>
+            <path>$['emailNotificationEnabled']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="826f7fe4-77bd-4b04-85f0-2bc3ccfcc12b">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="userid" value="213"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>Cookie</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="deactivate_user" id="062d9caa-82f5-4b6c-8ff7-ed172b7d25b0">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/users/{userid}/active" methodName="deactivateUser" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="deactivate_user" id="c42c312c-b9b2-4f68-a169-31be13b0ff79" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{  
+   "userId":${#Project#currentUserId},
+   "active":false
+}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/users/213/active</con:originalUri>
+        <con:assertion type="JsonPath Match" id="26382705-b96d-4250-b2ae-496200626b36" name="Active = false">
+          <con:configuration>
+            <path>$['active']</path>
+            <content>false</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="71a1bee9-fe15-4649-a5b4-ae146e54bbd8">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="userid" value="${#Project#currentUserId}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>Cookie</con:entry>
+          <con:entry>userid</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="create_SIEM_UDP" id="7fe7af05-92ba-4457-b465-42b6d712bf66">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/siem/systemInfo" methodName="createSIEM" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="create_SIEM_UDP" id="a219c4f9-8d12-4299-932e-1e632ac87e6c" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>[{"ip":"10.50.50.111","port":514,"name":"APITEST","description":"APITEST","isActive":"true","protocol":"UDP","siemTypeId":1}]</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/siem/systemInfo</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="61d77cfc-cdb7-4ebe-ad72-ed0a4cf3d73a" name="Valid HTTP Status Codes">
+          <con:settings/>
+          <con:configuration>
+            <codes>201</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="f2fb7781-cc50-4dea-a6d2-dd7c42fe1004">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_SIEM_info" id="c935ddfc-2891-408b-82c0-39ffd8d2c707">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/siem/systemInfo" methodName="getSIEMInfo" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_SIEM_info" id="a219c4f9-8d12-4299-932e-1e632ac87e6c" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/siem/systemInfo</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="5024f88f-c43c-4f0c-a7bc-4b65612754d1" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="e93b01f4-0ad0-433c-b045-a63d9090fb63">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="e320a019-f094-4c17-bdb3-c60e68ab26d6" name="Check for existence of [name]">
+          <con:configuration>
+            <path>$[0]['name']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="setSiemIdAndCheckProperties" id="46195961-56d2-47f0-84e0-0a2b649d0137">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+
+		//get and parse response
+		def response=context.expand('${get_SIEM_info#Response}')		
+		def json = new JsonSlurper().parseText(response)
+
+		//number of SIEM configurations that exist
+		siemNum = json['name'].size()
+		log.info(siemNum)
+		int i;
+		//iterate through all configs to find the one that was created
+		for(i = 0; i&lt;siemNum; i++){
+			log.info(json['name'][i])
+			if(json['name'][i].equals("APITEST")){
+				log.info(json[i]['siemconfigId'])//].toString());
+				testRunner.testCase.testSuite.project.setPropertyValue("siemId", json[i]['siemconfigId'].toString());
+				break;
+			}
+		
+		}
+		//iterated through all and didn't find
+		if(i == siemNum){
+			log.info("iterated through all and didn't find")
+			return false;
+		}
+
+		//check correct properties
+		else{
+			port = json[i]['port'].toString().equals("777");
+               desc = json[i]['description'].toString().equals("test");
+			ip = json[i]['ip'].toString().equals("10.50.50.179");
+
+			log.info("port=" + port.toString() +" desc="+desc.toString() + "  ip="+ip.toString())
+			
+			//true only if all properties match
+			if(port &amp;&amp; desc &amp;&amp; ip){
+				return true;
+			}
+		}
+		//incorrect property found
+		return false;</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="delay" name="wait" id="6fad0be2-31a7-45d2-89e5-e30ad3962221">
+    <con:settings/>
+    <con:config>
+      <delay>10000</delay>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="delete_SIEM_UDP" id="c7e38f7d-f75b-4880-830f-20e2260fea5c">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/siem/systemInfo" methodName="deleteSIEM" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="delete_SIEM_UDP" id="a219c4f9-8d12-4299-932e-1e632ac87e6c" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>[{"siemconfigId":${#Project#siemId}}]</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/siem/systemInfo</con:originalUri>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="0d6d1726-0bae-421d-bb2b-f3ec8f25c916">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="b6ac3b99-6cf4-4374-acc7-91a9b6c5068a">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="siemconfigId" value="72"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="create_SIEM_TCP" id="49e31d75-3d87-4ab4-b9f0-fad132a97f7e">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/siem/systemInfo" methodName="createSIEM" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="create_SIEM_TCP" id="a219c4f9-8d12-4299-932e-1e632ac87e6c" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>[{"ip":"10.50.50.111","port":514,"name":"APITEST TCP","description":"APITEST TCP","isActive":"true","protocol":"TCP","siemTypeId":2}]</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/siem/systemInfo</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="61d77cfc-cdb7-4ebe-ad72-ed0a4cf3d73a" name="Valid HTTP Status Codes">
+          <con:settings/>
+          <con:configuration>
+            <codes>201</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="f2fb7781-cc50-4dea-a6d2-dd7c42fe1004">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_SIEM_info_2" id="60c09a6e-1748-4558-811a-8c2dc84a8c42">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/siem/systemInfo" methodName="getSIEMInfo" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_SIEM_info_2" id="a219c4f9-8d12-4299-932e-1e632ac87e6c" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/siem/systemInfo</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="5024f88f-c43c-4f0c-a7bc-4b65612754d1" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="e93b01f4-0ad0-433c-b045-a63d9090fb63">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="e320a019-f094-4c17-bdb3-c60e68ab26d6" name="Check for existence of [name]">
+          <con:configuration>
+            <path>$[0]['name']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="setSiemIdTCPAndCheckProperties" id="6d5c8f5c-1851-4a7d-a27a-447cd6bc5bc5">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+
+		//get and parse response
+		def response=context.expand('${get_SIEM_info_2#Response}')		
+		def json = new JsonSlurper().parseText(response)
+
+		//number of SIEM configurations that exist
+		siemNum = json['name'].size()
+		log.info(siemNum)
+		int i;
+		//iterate through all configs to find the one that was created
+		for(i = 0; i&lt;siemNum; i++){
+			log.info(json['name'][i])
+			if(json['name'][i].equals("APITEST TCP")){
+				log.info(json[i]['siemconfigId'])//].toString());
+				testRunner.testCase.testSuite.project.setPropertyValue("siemId", json[i]['siemconfigId'].toString());
+				break;
+			}
+		
+		}
+		//iterated through all and didn't find
+		if(i == siemNum){
+			log.info("iterated through all and didn't find")
+			return false;
+		}
+
+		//check correct properties
+		else{
+			port = json[i]['port'].toString().equals("888");
+               desc = json[i]['description'].toString().equals("test APITEST TCP");
+			ip = json[i]['ip'].toString().equals("10.50.50.179");
+
+			log.info("port=" + port.toString() +" desc="+desc.toString() + "  ip="+ip.toString())
+			
+			//true only if all properties match
+			if(port &amp;&amp; desc &amp;&amp; ip){
+				return true;
+			}
+		}
+		//incorrect property found
+		return false;</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="delete_SIEM_TCP" id="8e89f478-42cd-42bf-a4d2-a02b3da14a40">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/siem/systemInfo" methodName="deleteSIEM" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="delete_SIEM_TCP" id="a219c4f9-8d12-4299-932e-1e632ac87e6c" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>[{"siemconfigId":${#Project#siemId}}]</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/siem/systemInfo</con:originalUri>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="0d6d1726-0bae-421d-bb2b-f3ec8f25c916">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="861b7ebf-9c88-4b76-9e58-381172c79ccf">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="siemconfigId" value="72"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="activate_application_logging" id="a02e6e74-b4d6-40ca-93e4-6d4eb6919c17">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/applicationconfig" methodName="activateLogging" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="activate_application_logging" id="39fca37e-16ed-477d-a971-86eb082f5401" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{  
+   "configId":"4",
+   "configName":"AuditSwitch",
+   "configValue":"1",
+   "dataType":"INT",
+   "isActive":true,
+   "description":"Audit activity switch ON / OFF",
+   "modifiedUserId":2,
+   "modifiedDateTime":"2017-07-12 17:30:27.000"
+}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/xma/applicationconfig</con:originalUri>
+        <con:assertion type="JsonPath Match" id="213e5433-dc73-41db-a540-100d7894b953" name="isActive = true">
+          <con:configuration>
+            <path>$['isActive']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="c9116ca2-754c-4663-bd6b-3ce08fcfda9c">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="deactivate_application_logging" id="734d24ea-3cb3-4b9a-b322-05dd1de8efb2">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/applicationconfig" methodName="activateLogging" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="deactivate_application_logging" id="39fca37e-16ed-477d-a971-86eb082f5401" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{  
+   "configId":"4",
+   "configName":"AuditSwitch",
+   "configValue":"1",
+   "dataType":"INT",
+   "isActive":false,
+   "description":"Audit activity switch ON / OFF",
+   "modifiedUserId":2,
+   "modifiedDateTime":"2017-07-12 17:30:27.000"
+}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/xma/applicationconfig</con:originalUri>
+        <con:assertion type="JsonPath Match" id="f7c143de-132a-42b7-863f-0c964e00613d" name="isActive = false">
+          <con:configuration>
+            <path>$['isActive']</path>
+            <content>false</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="e0218874-c4c6-4ae1-a43c-266178067098">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="reactivate_logging" id="20cce534-1868-47c2-9530-834eb723767f">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/applicationconfig" methodName="activateLogging" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="reactivate_logging" id="39fca37e-16ed-477d-a971-86eb082f5401" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{  
+   "configId":"4",
+   "configName":"AuditSwitch",
+   "configValue":"1",
+   "dataType":"INT",
+   "isActive":true,
+   "description":"Audit activity switch ON / OFF",
+   "modifiedUserId":2,
+   "modifiedDateTime":"2017-07-12 17:30:27.000"
+}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/xma/applicationconfig</con:originalUri>
+        <con:assertion type="JsonPath Match" id="213e5433-dc73-41db-a540-100d7894b953" name="isActive = true">
+          <con:configuration>
+            <path>$['isActive']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="841e4cf5-76e2-4f1b-be22-b2debba7896e">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_application_logging_info" id="b3388d27-ce5d-47a5-a288-6356299b5596">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/admin/applicationconfig" methodName="applicationLogging" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_application_logging_info" id="0a400dca-6bd7-4c87-a32b-fa8b876e8bdb" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/admin/emailconfig/</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="fc360eba-3b0f-4c90-8726-af80b778735e" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="d25cd437-9e68-4be4-b3b6-bc4cee5016ed" name="isActive = true">
+          <con:configuration>
+            <path>$['isActive']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Count" name="Error Count = 0" id="c1f55085-373a-463e-b55b-fec70256de2d">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="set_log_level_and_size (Warn, 2)" id="8d661601-6d89-4a22-b51c-4c4e5c243d24">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/logging/loggerlevel/all" methodName="setLogLevelSize" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="set_log_level_and_size (Warn, 2)" id="6da5efb8-66db-4a2d-a933-86fc82d0869d" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:encoding xsi:nil="true"/>
+        <con:request>{"Middle Tier":{"logLevel":"WARN","logSize":"2"},"CLIM":{"logLevel":"WARN","logSize":"2"},"Security Intelligence":{"logLevel":"WARN","logSize":"2"},"Collector":{"logLevel":"WARN","logSize":"2"}}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/logging/loggerlevel</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="17d2ff33-0164-4c7c-9e50-8f100309e99b" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="a32ddb8f-b965-4073-bd7b-6ee0c40b6fd6">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="set_log_level_and_size (back to default- Error, 1)" id="98cfc4ec-c36e-47f3-8001-6d4ad305b1e1">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/api/logging/loggerlevel/all" methodName="setLogLevelSize" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="set_log_level_and_size (back to default- Error, 1)" id="6da5efb8-66db-4a2d-a933-86fc82d0869d" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:encoding xsi:nil="true"/>
+        <con:request>{"Middle Tier":{"logLevel":"ERROR","logSize":1},"CLIM":{"logLevel":"ERROR","logSize":1},"Security Intelligence":{"logLevel":"ERROR","logSize":1},"Collector":{"logLevel":"ERROR","logSize":1}}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/logging/loggerlevel</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="17d2ff33-0164-4c7c-9e50-8f100309e99b" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="a32ddb8f-b965-4073-bd7b-6ee0c40b6fd6">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="download_report_CSV" id="d0d0c201-34e9-4574-8ff4-d0c8b9b16f50">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-reports/api/auditreport/csv/from/{date1}/to/{date2}" methodName="downloadAuditReportCSV" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="download_report_CSV" id="f0d13b98-a8da-4b28-9c7c-c2da41701232" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/auditreport/csv/from/2017-07-11/to/2017-07-11</con:originalUri>
+        <con:assertion type="XPath Match" id="17c89658-73b1-4605-b7ca-0134cca9f595" name="contentType = text/csv">
+          <con:configuration>
+            <path>//data[1]/@contentType</path>
+            <content>text/csv</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Simple Contains" id="ae3aea08-a66a-47e3-911b-09d3ac611f19" name="Contains Correct Headers">
+          <con:configuration>
+            <token>Row No,UserName,SystemName,IPAddress,Object,Action,Date,Time,SessionId</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="6742e105-e63e-4cbd-8b43-a1e90e6ff847">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="date2" value="2017-07-11"/>
+          <con:entry key="date1" value="2017-07-11"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>date1</con:entry>
+          <con:entry>date2</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="download_report_PDF" id="32557a2f-0b99-4509-b72d-dc68c156a9c2">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-reports/api/auditreport/pdf/from/{date1}/to/{date2}" methodName="downloadAuditReportPDF" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="download_report_PDF" id="f0d13b98-a8da-4b28-9c7c-c2da41701232" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/auditreport/csv/from/2017-07-11/to/2017-07-11</con:originalUri>
+        <con:assertion type="XPath Match" id="0a22448a-b204-4b7a-bc7d-93b3cc3ad9b5" name="contentType = application/pdf">
+          <con:configuration>
+            <path>//data[1]/@contentType</path>
+            <content>application/pdf</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="2dee2fe5-e5f8-4e30-9c68-9cae861305e3">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="date2" value="2017-07-11"/>
+          <con:entry key="date1" value="2017-07-11"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>date1</con:entry>
+          <con:entry>date2</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="download_report_XLSX" id="ebb5c949-6e85-4c5f-9f80-84b4de96a014">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-reports/api/auditreport/xlsx/from/{date1}/to/{date2}" methodName="downloadAuditReportXLSX" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="download_report_XLSX" id="f0d13b98-a8da-4b28-9c7c-c2da41701232" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/auditreport/csv/from/2017-07-11/to/2017-07-11</con:originalUri>
+        <con:assertion type="XPath Match" id="0a22448a-b204-4b7a-bc7d-93b3cc3ad9b5" name="contentType = application/x-ms-excel">
+          <con:configuration>
+            <path>//data[1]/@contentType</path>
+            <content>application/x-ms-excel</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Simple NotContains" name="Does Not Contain Error" id="0156b3cc-3cd4-408c-8f0b-9a0fb88900dd">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="date2" value="2017-07-11"/>
+          <con:entry key="date1" value="2017-07-11"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>date1</con:entry>
+          <con:entry>date2</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Logout" id="e09f1fec-a615-44bc-bece-4ecf0c3c038c">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/logout" methodName="logout" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Logout" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="e9694d1a-46d4-4be3-b550-499e077969cb">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="outputTimesToExcel" id="50dc0fa2-2d2a-4786-8ed6-96cd1264389c" disabled="true">
+    <con:settings/>
+    <con:config>
+      <script><![CDATA[import groovy. json.*
+import java.io.*;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.hssf.usermodel.*;
+import java.util.Iterator;
+
+          def projectDirectory = context.expand('${projectDir}')
+		def fileName = projectDirectory + testRunner.testCase.testSuite.project.getPropertyValue("reportsFilename")
+          log.info(fileName)
+
+		File file = new File(fileName)
+		
+		FileInputStream fsIP= new FileInputStream(file); //Read the spreadsheet that needs to be updated
+          HSSFWorkbook wb = new HSSFWorkbook(fsIP); //Access the workbook
+          HSSFSheet worksheet = wb.getSheetAt(0); //Access the worksheet, so that we can update / modify it.
+          
+		String[] steps = ["get_email_config_info", "deactivate_email_notif", "activate_email_notif", "update_XMA_config", 
+					   "confirm_XMA_info_changed", "get_XTR_config_info", "update_XTR_config", "get_user_list", "activate_user",
+					   "deactivate_user", "activate_user_email_notif","deactivate_user_email_notif","create_SIEM_UDP","get_SIEM_info",
+					   "delete_SIEM_UDP","create_SIEM_TCP","delete_SIEM_TCP","activate_application_logging", "deactivate_application_logging","reactivate_logging",
+					   "get_application_logging_info", "set_log_level_and_size (Warn, 2)", "set_log_level_and_size (back to default- Error, 1)", "download_report_CSV",
+					   "download_report_PDF","download_report_XLSX"];
+
+		//get all steps from Excel
+          HashMap<String,Integer> stepsMap=new HashMap<String,Integer>();  
+          for(int i = 1; i <= worksheet.getLastRowNum() ; i++){
+          	HSSFRow row = worksheet.getRow(i);
+			cell = row.getCell(0);
+			def stepName = cell.toString();
+               stepsMap.put(stepName,i);  
+		}
+	
+		Cell cell = null; // declare a Cell object
+		for(int i = 0; i < steps.length; i++){
+			def currentStepName = steps[i];
+			currentStepIndex = stepsMap.get(currentStepName);
+			if (currentStepIndex!=null){
+				def currentTestStep = testRunner.testCase.testSteps[currentStepName];
+				if (currentTestStep == null){
+					log.info("NOT FOUND PROJECT STEP " + currentStepName.toString());
+				}
+				else{
+					def currentTestStepResponse = currentTestStep.testRequest.response;
+					if (currentStepIndex != null && currentTestStepResponse != null){
+						def response = currentTestStep.testRequest.response.timeTaken;
+						log.info(response)
+						HSSFRow row = worksheet.getRow(currentStepIndex);
+						cell = row.getCell(9);
+						cell.setCellValue(response);
+					}
+					else{
+						log.info("NOT FOUND TIMETAKEN FOR " + currentStepName.toString());
+					}
+				}
+			}
+			else{
+				log.info("NOT FOUND STEP IN EXCEL " + currentStepName.toString());
+			}
+		}			
+
+		fsIP.close(); //Close the InputStream
+		FileOutputStream output_file =new FileOutputStream(file);  //Open FileOutputStream to write updates
+          wb.write(output_file); //write changes
+          output_file.close();  //close the stream]]></script>
+    </con:config>
+  </con:testStep>
+  <con:properties>
+    <con:property>
+      <con:name>correctProperties</con:name>
+      <con:value/>
+    </con:property>
+  </con:properties>
+  <con:reportParameters/>
+  <con:breakPoints>
+    <con:testStepId>8b46bd6b-1899-462d-ba68-7c53f3b27f77</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>5fabd745-60bc-41a4-b2f1-c448f6c4aafb</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>c94bed62-ba76-4bff-8921-64833fe67eb7</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>9d840cbe-2ab0-4df9-9f7a-7e3277cf002c</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>c3f7bf3e-fca9-4dbb-be08-bdfaedc5486e</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>d0de66bb-68f4-4f1f-ad37-78701a87491b</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>63c409f7-f336-4a03-bcac-2436db3c7b7e</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>ceacacf0-e057-4b44-81fd-8ac8655c7f91</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>1f4acec7-5583-41a7-97f2-81c1a00ee1f4</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>5e1e4193-d00e-428c-864b-14ddb0d84e43</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>60d950d0-c8d5-4686-a026-2ae7877e27e0</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>d31f5036-2980-4e6f-9495-195922acbb3c</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>848b9404-c9db-4457-90eb-fc1672ef2c6f</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>82448d93-cc03-4f8e-9a8f-2c57023d6a5e</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>e74f0dd5-e35b-4208-bba9-9627279c22d8</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>3bc14ba4-d6f4-46f3-8181-da365d065028</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>449e3b9a-a15a-4a56-9d4e-075142825b16</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>038902d3-4be3-45ca-a8fa-7dd486c6e44f</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>da8adf59-1b0f-4928-9acf-549de675f2c2</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>f35465e7-59e3-4a25-8133-40c0e127f45e</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>30727524-95b5-4a1a-b29e-99eb4fcaf15c</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>cd523a52-c0d4-4d85-84f3-75b8c0953b7e</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>8a27f6b8-535e-48fe-b034-391cf3792d05</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>f9a51932-1148-4d18-84e6-cff9abee280a</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>151b65a8-4e6a-495c-bc47-6890db305266</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>fef3657f-eeb5-44d2-8231-a0b1348b12b1</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>459ab05a-6e12-49b4-b070-7d1d3c66ad38</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>1ece66b1-4b2e-48dc-8586-2fdf3e42b95d</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>ef05a872-d15b-4fd4-bd7c-8d4bee3b2818</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>3093b69d-71d2-4663-9bae-00da99e5b177</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>969c82d5-4cc6-4f18-943f-8582723d5158</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>f896681a-2359-4ea0-81b5-09814556ff66</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>93771750-c487-4df8-a3b1-24f2b0485723</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>2345b66c-afec-45a9-bfde-65e7a47c1c3e</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>ec7ba1e3-b7ad-4c13-9d5f-b0d18457b7df</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>8b59b452-9084-49a9-bc2a-e61b3f1492a8</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>4b845b87-0d07-4da7-8530-db614ab441d0</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>9b6b5403-8eeb-436c-99c8-a97eb8669106</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>c935ddfc-2891-408b-82c0-39ffd8d2c707</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>920425e3-3b33-4140-bbae-50e360c849a0</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>98cfc4ec-c36e-47f3-8001-6d4ad305b1e1</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>49e31d75-3d87-4ab4-b9f0-fad132a97f7e</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>60c09a6e-1748-4558-811a-8c2dc84a8c42</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>6d5c8f5c-1851-4a7d-a27a-447cd6bc5bc5</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>8e89f478-42cd-42bf-a4d2-a02b3da14a40</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>e667eed7-46eb-4708-9a8e-f37eb30aac2d</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>062d9caa-82f5-4b6c-8ff7-ed172b7d25b0</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>70f4573d-b89f-4448-ae68-170b9255ef33</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>0deecaf8-8219-43f3-b915-285ea149da91</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>8a4c27c6-bdbe-421e-8a8f-52413f3c7d23</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:environmentSpec>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:testCase>

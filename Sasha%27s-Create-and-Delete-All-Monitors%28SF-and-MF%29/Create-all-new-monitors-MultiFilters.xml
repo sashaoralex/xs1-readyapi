@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testCase id="b1ca7e77-87c1-4e46-b5d8-25c26db5190d" discardOkResults="false" failOnError="false" failTestCaseOnErrors="true" keepSession="false" name="Create all new monitors MultiFilters" searchProperties="true" timeout="0" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="b1ca7e77-87c1-4e46-b5d8-25c26db5190dfileName">Create-all-new-monitors-MultiFilters</con:setting>
+  </con:settings>
+  <con:savedRecentRuns>1</con:savedRecentRuns>
+  <con:testStep type="restrequest" name="Login" id="a713e12c-4c8d-4afa-a288-e57693fbb590">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Login" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="true">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" id="75fc935a-dfe4-4f6e-9029-a1939d6e560f" name="Login = true">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="c331986e-69e1-4678-8faa-f778df0d8cdc" name="userName = xs1apiregression">
+          <con:configuration>
+            <path>$['userName']</path>
+            <content>xs1apiregression</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#Project#password}"/>
+          <con:entry key="username" value="${#Project#username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="NotToAbortOnError" id="88195991-cbf3-4bea-a987-accbd654e3e1">
+    <con:settings/>
+    <con:config>
+      <script>testRunner.testCase.testSuite.project.getTestSuiteList().each
+{
+   it.getTestCaseList().each
+   {
+      //Switch the parameter value to 'true' if you need to enable 'Abort on Error' option
+      it.setFailOnError(false)
+   }
+}</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="setTokenAndCookie" id="c1b71bdf-03f3-4a24-975c-4c0327903bbb">
+    <con:settings/>
+    <con:config>
+      <script>def val = testRunner.testCase.testSteps['Login'].testRequest.response.getResponseHeaders()
+loggedInValue = "true"
+
+Map&lt;String,List> values  = new HashMap&lt;String,String>();
+
+for(int j = 0; j &lt; val.get("Set-Cookie").size(); j++)
+{
+	
+	def cjar = val.get("Set-Cookie")[j]
+	def cookies = cjar.tokenize("\\;")
+	
+	cookies.each() 
+	{ cookie ->
+    	def pair = cookie.tokenize("\\=")
+    	values.put(pair[0], pair[1])
+    
+    		log.info( "Key: " + pair[0] + ", Val: " + pair[1] )
+	}
+}
+
+		values.keySet()
+		if (values.get("SESSION") == null)
+		{
+			loggedInValue = "false"
+		}
+		log.info("LOGGED IN: " + loggedInValue)
+		testRunner.testCase.testSuite.project.setPropertyValue("loggedIn", loggedInValue)
+		testRunner.testCase.testSuite.project.setPropertyValue( 'token', values.get("XSRF-TOKEN"))
+		testRunner.testCase.testSuite.project.setPropertyValue( 'cookie', "SESSION="+values.get("SESSION" ))
+
+		//Generate TransactionID
+		//def random = (int)(Math.random()*1000);
+          //testRunner.testCase.testSuite.project.setPropertyValue("RandomID", String.valueOf((int)(Math.random()*100000)) );</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="datasource" name="DataSource" id="82672adb-96c1-4286-bf80-2a94ea8f689a">
+    <con:settings>
+      <con:setting id="com.eviware.soapui.impl.wsdl.teststeps.datasource.DataSourceContainer@prepared-properties">&lt;xml-fragment/></con:setting>
+    </con:settings>
+    <con:config xsi:type="con:DataSourceStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:dataSource type="Grid">
+        <con:configuration>
+          <check><![CDATA[<xml-fragment><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">true</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry><con:entry xmlns:con="http://eviware.com/soapui/config">false</con:entry></xml-fragment>]]></check>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiDeviceMF","entityTypeId":12,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"$DEV1"},{"nodeFilter":"\\*","entityFilter":"$DEV2"},{"nodeFilter":"\\*","entityFilter":"$HDL01DV"},{"nodeFilter":"\\*","entityFilter":"$HDLDEV1"},{"nodeFilter":"\\*","entityFilter":"$HDLDEV2"},{"nodeFilter":"\\*","entityFilter":"$HDLDEV3"},{"nodeFilter":"\\*","entityFilter":"$HDLDV1"},{"nodeFilter":"\\*","entityFilter":"$HDLDV11"},{"nodeFilter":"\\*","entityFilter":"$HDLDV2"},{"nodeFilter":"\\*","entityFilter":"$HDLDV3"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555818780000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":635,"attributeTypeName":"Acls","alert":true},{"attributeTypeId":167,"attributeTypeName":"AuditAccessFail","alert":true},{"attributeTypeId":168,"attributeTypeName":"AuditAccessPass","alert":true},{"attributeTypeId":5,"attributeTypeName":"AuditManageFail","alert":true},{"attributeTypeId":6,"attributeTypeName":"AuditManagePass","alert":true},{"attributeTypeId":44,"attributeTypeName":"IsFrozen","alert":true},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":52,"attributeTypeName":"OwnerGroupNumber","alert":true},{"attributeTypeId":89,"attributeTypeName":"OwnerUserId","alert":true},{"attributeTypeId":197,"attributeTypeName":"TextDesc","alert":true},{"attributeTypeId":199,"attributeTypeName":"WarningMode","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiDiskFileMF","entityTypeId":13,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"$QA1.QAT0.FUPCSTM"},{"nodeFilter":"\\*","entityFilter":"$QA1.QAT0.TESTMGR"},{"nodeFilter":"\\*","entityFilter":"$QA1.QAT0.XPQLOG"},{"nodeFilter":"\\*","entityFilter":"$QA1.QAT0.XSRFILE1"},{"nodeFilter":"\\*","entityFilter":"$QA1.QAT1.DSAPCSTM"},{"nodeFilter":"\\*","entityFilter":"$QA1.QAT1.FUPCSTM"},{"nodeFilter":"\\*","entityFilter":"$QA1.QAT1.TACLCSTM"},{"nodeFilter":"\\*","entityFilter":"$QA1.QAT1.TEDPROFL"},{"nodeFilter":"\\*","entityFilter":"$QA1.QAT9.TACLCSTM"},{"nodeFilter":"\\*","entityFilter":"$QA1.VTEST.TESTFILE"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555819440000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":635,"attributeTypeName":"Acls","alert":true},{"attributeTypeId":167,"attributeTypeName":"AuditAccessFail","alert":true},{"attributeTypeId":168,"attributeTypeName":"AuditAccessPass","alert":true},{"attributeTypeId":5,"attributeTypeName":"AuditManageFail","alert":true},{"attributeTypeId":6,"attributeTypeName":"AuditManagePass","alert":true},{"attributeTypeId":169,"attributeTypeName":"AuditPrivLogon","alert":true},{"attributeTypeId":172,"attributeTypeName":"ClearOnPurge","alert":true},{"attributeTypeId":44,"attributeTypeName":"IsFrozen","alert":true},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":85,"attributeTypeName":"Licensed","alert":true},{"attributeTypeId":52,"attributeTypeName":"OwnerGroupNumber","alert":true},{"attributeTypeId":89,"attributeTypeName":"OwnerUserId","alert":true},{"attributeTypeId":187,"attributeTypeName":"Persistent","alert":true},{"attributeTypeId":190,"attributeTypeName":"PrivLogon","alert":true},{"attributeTypeId":90,"attributeTypeName":"ProgId","alert":true},{"attributeTypeId":197,"attributeTypeName":"TextDesc","alert":true},{"attributeTypeId":198,"attributeTypeName":"Trust","alert":true},{"attributeTypeId":199,"attributeTypeName":"WarningMode","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiDiskFilePatternMF","entityTypeId":14,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"$VNEO4.XAC580.AUD*"},{"nodeFilter":"\\*","entityFilter":"$VPXC.C47761.*"},{"nodeFilter":"\\*","entityFilter":"$VSJU.P46.*"},{"nodeFilter":"\\*","entityFilter":"$VSJU.P46WORK.*"},{"nodeFilter":"\\*","entityFilter":"$VSXH.JUNK.*"},{"nodeFilter":"\\*","entityFilter":"$VSXH.JUNK2.*"},{"nodeFilter":"\\*","entityFilter":"$VIK.*.*"},{"nodeFilter":"\\*","entityFilter":"$VTLH.*.*"},{"nodeFilter":"\\*","entityFilter":"$QA1.X.X*"},{"nodeFilter":"\\*","entityFilter":"$VSJU.P26.ZZ*"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555819800000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":635,"attributeTypeName":"Acls","alert":true},{"attributeTypeId":167,"attributeTypeName":"AuditAccessFail","alert":true},{"attributeTypeId":168,"attributeTypeName":"AuditAccessPass","alert":true},{"attributeTypeId":5,"attributeTypeName":"AuditManageFail","alert":true},{"attributeTypeId":6,"attributeTypeName":"AuditManagePass","alert":true},{"attributeTypeId":18,"attributeTypeName":"CreationTime","alert":true},{"attributeTypeId":628,"attributeTypeName":"CreatorIsAlias","alert":true},{"attributeTypeId":20,"attributeTypeName":"CreatorLoginName","alert":true},{"attributeTypeId":22,"attributeTypeName":"CreatorNodeNumber","alert":true},{"attributeTypeId":629,"attributeTypeName":"CreatorUserid","alert":true},{"attributeTypeId":44,"attributeTypeName":"IsFrozen","alert":true},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":630,"attributeTypeName":"ModifierIsAlias","alert":true},{"attributeTypeId":631,"attributeTypeName":"ModifierLoginName","alert":true},{"attributeTypeId":632,"attributeTypeName":"ModifierNodeNumber","alert":true},{"attributeTypeId":633,"attributeTypeName":"ModifierUserid","alert":true},{"attributeTypeId":52,"attributeTypeName":"OwnerGroupNumber","alert":true},{"attributeTypeId":89,"attributeTypeName":"OwnerUserId","alert":true},{"attributeTypeId":199,"attributeTypeName":"WarningMode","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiGroupMF","entityTypeId":3,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"ADMIN"},{"nodeFilter":"\\*","entityFilter":"AOL"},{"nodeFilter":"\\*","entityFilter":"APPDB"},{"nodeFilter":"\\*","entityFilter":"APPDEV"},{"nodeFilter":"\\*","entityFilter":"BANK"},{"nodeFilter":"\\*","entityFilter":"MERLON"},{"nodeFilter":"\\*","entityFilter":"NEOVIEW"},{"nodeFilter":"\\*","entityFilter":"PRO"},{"nodeFilter":"\\*","entityFilter":"QAALIAS"},{"nodeFilter":"\\*","entityFilter":"QATEST"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555821060000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":9,"attributeTypeName":"AutoDelete","alert":true},{"attributeTypeId":18,"attributeTypeName":"CreationTime","alert":true},{"attributeTypeId":19,"attributeTypeName":"CreatorGroupNumber","alert":true},{"attributeTypeId":20,"attributeTypeName":"CreatorLoginName","alert":true},{"attributeTypeId":22,"attributeTypeName":"CreatorNodeNumber","alert":true},{"attributeTypeId":23,"attributeTypeName":"CreatorType","alert":true},{"attributeTypeId":24,"attributeTypeName":"CreatorUserNumber","alert":true},{"attributeTypeId":28,"attributeTypeName":"Description","alert":true},{"attributeTypeId":38,"attributeTypeName":"GroupName","alert":true},{"attributeTypeId":39,"attributeTypeName":"GroupNumber","alert":true},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":52,"attributeTypeName":"OwnerGroupNumber","alert":true},{"attributeTypeId":53,"attributeTypeName":"OwnerUserNumber","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiGuardianFileMF","entityTypeId":9,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"$VAXK.AKOZLOV.AKOZLOV"},{"nodeFilter":"\\*","entityFilter":"$VAXK.AKOZLOV.EXIT"},{"nodeFilter":"\\*","entityFilter":"$VAXK.AKOZLOV.FAVFILM"},{"nodeFilter":"\\*","entityFilter":"$VAXK.AKOZLOV.FILENAME"},{"nodeFilter":"\\*","entityFilter":"$VAXK.AKOZLOV.NEWFILE"},{"nodeFilter":"\\*","entityFilter":"$VAXK.AKOZLOV.NEWFILE1"},{"nodeFilter":"\\*","entityFilter":"$VAXK.AKOZLOV.NEWFILE2"},{"nodeFilter":"\\*","entityFilter":"$VAXK.AKOZLOV.TACLCSTM"},{"nodeFilter":"\\*","entityFilter":"$VAXK.AKOZLOV.SASHA"},{"nodeFilter":"\\*","entityFilter":"$VAXK.AKOZLOV.PURGE"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555821600000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":77,"attributeTypeName":"Audited","alert":true},{"attributeTypeId":79,"attributeTypeName":"CatalogName","alert":true},{"attributeTypeId":18,"attributeTypeName":"CreationTime","alert":true},{"attributeTypeId":80,"attributeTypeName":"Eof","alert":true},{"attributeTypeId":634,"attributeTypeName":"ExpireTime","alert":true},{"attributeTypeId":81,"attributeTypeName":"FileCode","alert":true},{"attributeTypeId":82,"attributeTypeName":"FileKind","alert":true},{"attributeTypeId":83,"attributeTypeName":"FileName","alert":true},{"attributeTypeId":84,"attributeTypeName":"FileType","alert":true},{"attributeTypeId":741,"attributeTypeName":"HashAlgorithm","alert":false},{"attributeTypeId":740,"attributeTypeName":"HashValue","alert":false},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":85,"attributeTypeName":"Licensed","alert":true},{"attributeTypeId":87,"attributeTypeName":"OpenTime","alert":true},{"attributeTypeId":88,"attributeTypeName":"OwnerGroupId","alert":true},{"attributeTypeId":89,"attributeTypeName":"OwnerUserId","alert":true},{"attributeTypeId":90,"attributeTypeName":"ProgId","alert":true},{"attributeTypeId":91,"attributeTypeName":"Security","alert":true},{"attributeTypeId":92,"attributeTypeName":"SqlObjectType","alert":true},{"attributeTypeId":93,"attributeTypeName":"SqlViewType","alert":true},{"attributeTypeId":94,"attributeTypeName":"Subvolume","alert":true},{"attributeTypeId":95,"attributeTypeName":"Virtual","alert":true},{"attributeTypeId":96,"attributeTypeName":"Volume","alert":true}],"groups":[],"policies":[41,42,43,44]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiObjectTypeMF","entityTypeId":15,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"DISCFILE"},{"nodeFilter":"\\*","entityFilter":"SUBPROCESS"},{"nodeFilter":"\\*","entityFilter":"SAVED-DISCFILE-PATTERN"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555822140000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":635,"attributeTypeName":"Acls","alert":true},{"attributeTypeId":167,"attributeTypeName":"AuditAccessFail","alert":true},{"attributeTypeId":168,"attributeTypeName":"AuditAccessPass","alert":true},{"attributeTypeId":5,"attributeTypeName":"AuditManageFail","alert":true},{"attributeTypeId":6,"attributeTypeName":"AuditManagePass","alert":true},{"attributeTypeId":44,"attributeTypeName":"IsFrozen","alert":true},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":52,"attributeTypeName":"OwnerGroupNumber","alert":true},{"attributeTypeId":89,"attributeTypeName":"OwnerUserId","alert":true},{"attributeTypeId":197,"attributeTypeName":"TextDesc","alert":true},{"attributeTypeId":199,"attributeTypeName":"WarningMode","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiOSSFileMF","entityTypeId":39,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"/usr"},{"nodeFilter":"\\*","entityFilter":"/usr/local"},{"nodeFilter":"\\*","entityFilter":"/usr/local/etc"},{"nodeFilter":"\\*","entityFilter":"/G"},{"nodeFilter":"\\*","entityFilter":"/G/VAXK"},{"nodeFilter":"\\*","entityFilter":"/G/VAXK/KOZLOV"},{"nodeFilter":"\\*","entityFilter":"/users/phil/abc"},{"nodeFilter":"\\*","entityFilter":"/users/ossolga"},{"nodeFilter":"\\*","entityFilter":"/users/test"},{"nodeFilter":"\\*","entityFilter":"/users/xswqa/OrphanFile"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555822200000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":723,"attributeTypeName":"AccessTime","alert":true},{"attributeTypeId":726,"attributeTypeName":"AclList","alert":true},{"attributeTypeId":703,"attributeTypeName":"DeviceId","alert":true},{"attributeTypeId":84,"attributeTypeName":"FileType","alert":true},{"attributeTypeId":711,"attributeTypeName":"GroupExecute","alert":true},{"attributeTypeId":709,"attributeTypeName":"GroupRead","alert":true},{"attributeTypeId":710,"attributeTypeName":"GroupWrite","alert":true},{"attributeTypeId":741,"attributeTypeName":"HashAlgorithm","alert":false},{"attributeTypeId":740,"attributeTypeName":"HashValue","alert":false},{"attributeTypeId":704,"attributeTypeName":"Inode","alert":true},{"attributeTypeId":724,"attributeTypeName":"ModificationTime","alert":true},{"attributeTypeId":705,"attributeTypeName":"NonStop","alert":true},{"attributeTypeId":718,"attributeTypeName":"NumberOfLinks","alert":true},{"attributeTypeId":714,"attributeTypeName":"OtherExecute","alert":true},{"attributeTypeId":712,"attributeTypeName":"OtherRead","alert":true},{"attributeTypeId":713,"attributeTypeName":"OtherWrite","alert":true},{"attributeTypeId":708,"attributeTypeName":"OwnerExecute","alert":true},{"attributeTypeId":719,"attributeTypeName":"OwnerGroup","alert":true},{"attributeTypeId":88,"attributeTypeName":"OwnerGroupId","alert":true},{"attributeTypeId":706,"attributeTypeName":"OwnerRead","alert":true},{"attributeTypeId":89,"attributeTypeName":"OwnerUserId","alert":true},{"attributeTypeId":720,"attributeTypeName":"OwnerUsername","alert":true},{"attributeTypeId":707,"attributeTypeName":"OwnerWrite","alert":true},{"attributeTypeId":748,"attributeTypeName":"PathName","alert":true},{"attributeTypeId":721,"attributeTypeName":"RemoteDeviceId","alert":true},{"attributeTypeId":91,"attributeTypeName":"Security","alert":true},{"attributeTypeId":715,"attributeTypeName":"SetGID","alert":true},{"attributeTypeId":716,"attributeTypeName":"SetUID","alert":true},{"attributeTypeId":722,"attributeTypeName":"Size","alert":true},{"attributeTypeId":725,"attributeTypeName":"StatusChangeTime","alert":true},{"attributeTypeId":717,"attributeTypeName":"Sticky","alert":true},{"attributeTypeId":727,"attributeTypeName":"UnderlyingLinkedFile","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiRemotePasswordMF","entityTypeId":6,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"79tst1:\\X"},{"nodeFilter":"\\*","entityFilter":"0123456789:\\X"},{"nodeFilter":"\\*","entityFilter":"8:\\GALAXY"},{"nodeFilter":"\\*","entityFilter":"ADMIN.SECURITY:\\X"},{"nodeFilter":"\\*","entityFilter":"ADMIN.SECURITY:\\EST1983"},{"nodeFilter":"\\*","entityFilter":"ADMIN.SECURITY:\\GALAXY"},{"nodeFilter":"\\*","entityFilter":"xypro-scottn:\\QUALITY"},{"nodeFilter":"\\*","entityFilter":"xypro-scottn:\\GUARD"},{"nodeFilter":"\\*","entityFilter":"xypro-scottn:\\GALAXY"},{"nodeFilter":"\\*","entityFilter":"xypro-scottn:\\EST1983"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555824480000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":48,"attributeTypeName":"LoginName","alert":true},{"attributeTypeId":49,"attributeTypeName":"LoginType","alert":true},{"attributeTypeId":63,"attributeTypeName":"RemoteNode","alert":true},{"attributeTypeId":64,"attributeTypeName":"RemotePassword","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiSecurityGroupMF","entityTypeId":37,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"SYSTEM-OPERATOR"},{"nodeFilter":"\\*","entityFilter":"SECURITY-PRV-ADMINISTRATOR"},{"nodeFilter":"\\*","entityFilter":"SECURITY-PERSISTENCE-ADMIN"},{"nodeFilter":"\\*","entityFilter":"SECURITY-OSS-ADMINISTRATOR"},{"nodeFilter":"\\*","entityFilter":"SECURITY-AUDITOR"},{"nodeFilter":"\\*","entityFilter":"SECURITY-ADMINISTRATOR"},{"nodeFilter":"\\*","entityFilter":"*ADMIN*"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555824900000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":635,"attributeTypeName":"Acls","alert":true},{"attributeTypeId":167,"attributeTypeName":"AuditAccessFail","alert":true},{"attributeTypeId":168,"attributeTypeName":"AuditAccessPass","alert":true},{"attributeTypeId":5,"attributeTypeName":"AuditManageFail","alert":true},{"attributeTypeId":6,"attributeTypeName":"AuditManagePass","alert":true},{"attributeTypeId":44,"attributeTypeName":"IsFrozen","alert":true},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":52,"attributeTypeName":"OwnerGroupNumber","alert":true},{"attributeTypeId":89,"attributeTypeName":"OwnerUserId","alert":true},{"attributeTypeId":197,"attributeTypeName":"TextDesc","alert":true},{"attributeTypeId":199,"attributeTypeName":"WarningMode","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiSEEPMF","entityTypeId":33,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"XOS"},{"nodeFilter":"\\*","entityFilter":"XPQ"},{"nodeFilter":"\\*","entityFilter":"XUA"},{"nodeFilter":"\\*","entityFilter":"X*"},{"nodeFilter":"\\*","entityFilter":"*"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555825680000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":170,"attributeTypeName":"AuthenticationEvent","alert":true},{"attributeTypeId":171,"attributeTypeName":"AuthorizationEvent","alert":true},{"attributeTypeId":173,"attributeTypeName":"Cpu","alert":true},{"attributeTypeId":179,"attributeTypeName":"IsEnabled","alert":true},{"attributeTypeId":180,"attributeTypeName":"LibraryFile","alert":true},{"attributeTypeId":185,"attributeTypeName":"ParamText","alert":true},{"attributeTypeId":186,"attributeTypeName":"PasswordEvent","alert":true},{"attributeTypeId":189,"attributeTypeName":"Priority","alert":true},{"attributeTypeId":191,"attributeTypeName":"ProcessName","alert":true},{"attributeTypeId":192,"attributeTypeName":"ProgramFile","alert":true},{"attributeTypeId":194,"attributeTypeName":"ResponseTimeout","alert":true},{"attributeTypeId":196,"attributeTypeName":"SwapVolume","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiSubdeviceMF","entityTypeId":18,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"$HDL1.#HDLS3"},{"nodeFilter":"\\*","entityFilter":"$HDL1.#HDLS4"},{"nodeFilter":"\\*","entityFilter":"$HDL1.#HDLS5"},{"nodeFilter":"\\*","entityFilter":"$HDL1.#HDLS6"},{"nodeFilter":"\\*","entityFilter":"$HDL1.#HSUB1"},{"nodeFilter":"\\*","entityFilter":"$HDL1.#HSUB21"},{"nodeFilter":"\\*","entityFilter":"$HDL1.#HSUB2A"},{"nodeFilter":"\\*","entityFilter":"$HDL1.#HSUB2N"},{"nodeFilter":"\\*","entityFilter":"$HDLDEV1.#HDLSUBA"},{"nodeFilter":"\\*","entityFilter":"$HDLDEV1.#HDLSUBB"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555825920000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":635,"attributeTypeName":"Acls","alert":true},{"attributeTypeId":167,"attributeTypeName":"AuditAccessFail","alert":true},{"attributeTypeId":168,"attributeTypeName":"AuditAccessPass","alert":true},{"attributeTypeId":5,"attributeTypeName":"AuditManageFail","alert":true},{"attributeTypeId":6,"attributeTypeName":"AuditManagePass","alert":true},{"attributeTypeId":44,"attributeTypeName":"IsFrozen","alert":true},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":52,"attributeTypeName":"OwnerGroupNumber","alert":true},{"attributeTypeId":89,"attributeTypeName":"OwnerUserId","alert":true},{"attributeTypeId":197,"attributeTypeName":"TextDesc","alert":true},{"attributeTypeId":199,"attributeTypeName":"WarningMode","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiSubprocessMF","entityTypeId":19,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"$HDL.#DHL1"},{"nodeFilter":"\\*","entityFilter":"$HDL.#DLH2"},{"nodeFilter":"\\*","entityFilter":"$HDL.#DLH3"},{"nodeFilter":"\\*","entityFilter":"$HDL.#DLH4"},{"nodeFilter":"\\*","entityFilter":"$HDL.#DLH4A"},{"nodeFilter":"\\*","entityFilter":"$HDL.#DLH5"},{"nodeFilter":"\\*","entityFilter":"$HDL.#SP001"},{"nodeFilter":"\\*","entityFilter":"$HDL.#SP002"},{"nodeFilter":"\\*","entityFilter":"$HDL.#SP003"},{"nodeFilter":"\\*","entityFilter":"$HDL.#TSTD1"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555826460000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":635,"attributeTypeName":"Acls","alert":true},{"attributeTypeId":167,"attributeTypeName":"AuditAccessFail","alert":true},{"attributeTypeId":168,"attributeTypeName":"AuditAccessPass","alert":true},{"attributeTypeId":5,"attributeTypeName":"AuditManageFail","alert":true},{"attributeTypeId":6,"attributeTypeName":"AuditManagePass","alert":true},{"attributeTypeId":44,"attributeTypeName":"IsFrozen","alert":true},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":52,"attributeTypeName":"OwnerGroupNumber","alert":true},{"attributeTypeId":89,"attributeTypeName":"OwnerUserId","alert":true},{"attributeTypeId":197,"attributeTypeName":"TextDesc","alert":true},{"attributeTypeId":199,"attributeTypeName":"WarningMode","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiSubvolMF","entityTypeId":20,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"$DSMSCM.TAPECAT"},{"nodeFilter":"\\*","entityFilter":"$QA1.SFGTEST"},{"nodeFilter":"\\*","entityFilter":"$QA2.SFGTEST"},{"nodeFilter":"\\*","entityFilter":"$VAXP.HASH"},{"nodeFilter":"\\*","entityFilter":"$VDAC.XDWUSER1"},{"nodeFilter":"\\*","entityFilter":"$VIK.IK"},{"nodeFilter":"\\*","entityFilter":"$VTSLA.ACLDENY"},{"nodeFilter":"\\*","entityFilter":"$VIK.IKMATCL"},{"nodeFilter":"\\*","entityFilter":"$VIK.WORKEST"},{"nodeFilter":"\\*","entityFilter":"$VIK.XMADAT"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555826640000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":635,"attributeTypeName":"Acls","alert":true},{"attributeTypeId":167,"attributeTypeName":"AuditAccessFail","alert":true},{"attributeTypeId":168,"attributeTypeName":"AuditAccessPass","alert":true},{"attributeTypeId":5,"attributeTypeName":"AuditManageFail","alert":true},{"attributeTypeId":6,"attributeTypeName":"AuditManagePass","alert":true},{"attributeTypeId":44,"attributeTypeName":"IsFrozen","alert":true},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":52,"attributeTypeName":"OwnerGroupNumber","alert":true},{"attributeTypeId":89,"attributeTypeName":"OwnerUserId","alert":true},{"attributeTypeId":197,"attributeTypeName":"TextDesc","alert":true},{"attributeTypeId":199,"attributeTypeName":"WarningMode","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiTerminalMF","entityTypeId":21,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"$IKS.#TERM1"},{"nodeFilter":"\\*","entityFilter":"$IKS.#TERM2"},{"nodeFilter":"\\*","entityFilter":"$IKS.#TRM"},{"nodeFilter":"\\*","entityFilter":"$QATL.#STRM"},{"nodeFilter":"\\*","entityFilter":"$QITEL.#STRM"},{"nodeFilter":"\\*","entityFilter":"$ZPTY.#T001"},{"nodeFilter":"\\*","entityFilter":"$ZTN0.#TERM1"},{"nodeFilter":"\\*","entityFilter":"$C3.#D4"},{"nodeFilter":"\\*","entityFilter":"$C3.#D5"},{"nodeFilter":"\\*","entityFilter":"$IKTEL.#STRM"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555826940000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":173,"attributeTypeName":"Cpu","alert":true},{"attributeTypeId":44,"attributeTypeName":"IsFrozen","alert":true},{"attributeTypeId":180,"attributeTypeName":"LibraryFile","alert":true},{"attributeTypeId":185,"attributeTypeName":"ParamText","alert":true},{"attributeTypeId":189,"attributeTypeName":"Priority","alert":true},{"attributeTypeId":191,"attributeTypeName":"ProcessName","alert":true},{"attributeTypeId":192,"attributeTypeName":"ProgramFile","alert":true},{"attributeTypeId":196,"attributeTypeName":"SwapVolume","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiUserMF","entityTypeId":1,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"QA.AKOZLOV"},{"nodeFilter":"\\*","entityFilter":"TESLAQA.MA"},{"nodeFilter":"\\*","entityFilter":"QA.OLGAG"},{"nodeFilter":"\\*","entityFilter":"TESLAQA.SASHA"},{"nodeFilter":"\\*","entityFilter":"TESLAQA.OWNER"},{"nodeFilter":"\\*","entityFilter":"QA.EOLMOS"},{"nodeFilter":"\\*","entityFilter":"QA.AHALL"},{"nodeFilter":"\\*","entityFilter":"QA.IKOT"},{"nodeFilter":"\\*","entityFilter":"QA.XS1USER"},{"nodeFilter":"\\*","entityFilter":"QA.XS1TEST"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555827120000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":3,"attributeTypeName":"AuditAuthenticateFail","alert":true},{"attributeTypeId":4,"attributeTypeName":"AuditAuthenticatePass","alert":true},{"attributeTypeId":5,"attributeTypeName":"AuditManageFail","alert":true},{"attributeTypeId":6,"attributeTypeName":"AuditManagePass","alert":true},{"attributeTypeId":7,"attributeTypeName":"AuditUserActionFail","alert":true},{"attributeTypeId":8,"attributeTypeName":"AuditUserActionPass","alert":true},{"attributeTypeId":10,"attributeTypeName":"CiCpu","alert":true},{"attributeTypeId":11,"attributeTypeName":"CiLib","alert":true},{"attributeTypeId":12,"attributeTypeName":"CiName","alert":true},{"attributeTypeId":13,"attributeTypeName":"CiParamText","alert":true},{"attributeTypeId":14,"attributeTypeName":"CiPri","alert":true},{"attributeTypeId":15,"attributeTypeName":"CiProg","alert":true},{"attributeTypeId":16,"attributeTypeName":"CiSwap","alert":true},{"attributeTypeId":18,"attributeTypeName":"CreationTime","alert":true},{"attributeTypeId":19,"attributeTypeName":"CreatorGroupNumber","alert":true},{"attributeTypeId":20,"attributeTypeName":"CreatorLoginName","alert":true},{"attributeTypeId":22,"attributeTypeName":"CreatorNodeNumber","alert":true},{"attributeTypeId":23,"attributeTypeName":"CreatorType","alert":true},{"attributeTypeId":24,"attributeTypeName":"CreatorUserNumber","alert":true},{"attributeTypeId":25,"attributeTypeName":"DefaultSecurity","alert":true},{"attributeTypeId":26,"attributeTypeName":"DefaultSubvol","alert":true},{"attributeTypeId":27,"attributeTypeName":"DefaultVol","alert":true},{"attributeTypeId":29,"attributeTypeName":"DPAclCount","alert":true},{"attributeTypeId":30,"attributeTypeName":"DPAuditAccessFail","alert":true},{"attributeTypeId":31,"attributeTypeName":"DPAuditAccessPass","alert":true},{"attributeTypeId":32,"attributeTypeName":"DPAuditManageFail","alert":true},{"attributeTypeId":33,"attributeTypeName":"DPAuditManagePass","alert":true},{"attributeTypeId":34,"attributeTypeName":"DPOwnerGroupNumber","alert":true},{"attributeTypeId":35,"attributeTypeName":"DPOwnerUserNumber","alert":true},{"attributeTypeId":37,"attributeTypeName":"FailedLogonCount","alert":true},{"attributeTypeId":39,"attributeTypeName":"GroupNumber","alert":true},{"attributeTypeId":41,"attributeTypeName":"InitialDirectory","alert":true},{"attributeTypeId":42,"attributeTypeName":"InitialProgram","alert":true},{"attributeTypeId":43,"attributeTypeName":"InitialProgType","alert":true},{"attributeTypeId":282,"attributeTypeName":"IsAlias","alert":true},{"attributeTypeId":44,"attributeTypeName":"IsFrozen","alert":true},{"attributeTypeId":45,"attributeTypeName":"LastLogon","alert":true},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":47,"attributeTypeName":"LastUnsuccessfulAttempt","alert":true},{"attributeTypeId":52,"attributeTypeName":"OwnerGroupNumber","alert":true},{"attributeTypeId":53,"attributeTypeName":"OwnerUserNumber","alert":true},{"attributeTypeId":54,"attributeTypeName":"PasswordExpires","alert":true},{"attributeTypeId":55,"attributeTypeName":"PasswordExpiryGrace","alert":true},{"attributeTypeId":56,"attributeTypeName":"PasswordIsExpired","alert":true},{"attributeTypeId":57,"attributeTypeName":"PasswordLastChange","alert":true},{"attributeTypeId":58,"attributeTypeName":"PasswordMayChange","alert":true},{"attributeTypeId":59,"attributeTypeName":"PasswordMustChange","alert":true},{"attributeTypeId":60,"attributeTypeName":"PrimaryGroupNumber","alert":true},{"attributeTypeId":65,"attributeTypeName":"StaticFailedLogonCount","alert":true},{"attributeTypeId":66,"attributeTypeName":"StaticFailedLogonReset","alert":true},{"attributeTypeId":67,"attributeTypeName":"Status","alert":true},{"attributeTypeId":70,"attributeTypeName":"TextDescription","alert":true},{"attributeTypeId":626,"attributeTypeName":"UID","alert":true},{"attributeTypeId":71,"attributeTypeName":"UserExpires","alert":true},{"attributeTypeId":72,"attributeTypeName":"UserIsExpired","alert":true},{"attributeTypeId":74,"attributeTypeName":"UserNumber","alert":true}],"groups":[],"policies":[6,39,38,40,4,5,45,1,3,2,48]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <row>&lt;xml-fragment>&lt;con:entry xmlns:con="http://eviware.com/soapui/config">{"monitor":{"monitorId":-1,"monitorName":"ApiVolumeMF","entityTypeId":22,"nodeFilters":[{"nodeFilter":"\\*","entityFilter":"$DBS1"},{"nodeFilter":"\\*","entityFilter":"$DBS2"},{"nodeFilter":"\\*","entityFilter":"$DBS3"},{"nodeFilter":"\\*","entityFilter":"$DBS4"},{"nodeFilter":"\\*","entityFilter":"$VTSLA1"},{"nodeFilter":"\\*","entityFilter":"$XS1QA2"},{"nodeFilter":"\\*","entityFilter":"$VSJU"},{"nodeFilter":"\\*","entityFilter":"$VIK"},{"nodeFilter":"\\*","entityFilter":"$VTLH"},{"nodeFilter":"\\*","entityFilter":"$VXS1A"}],"analysisType":"Integrity Check","visibility":"Private","criticality":"Medium","alertSettings":{"onMissing":true,"onNew":true,"active":true},"schedule":{"triggerType":"Simple","startDateTime":1555827420000,"repeatInterval":1,"repeatUnit":"Days"},"attributes":[{"attributeTypeId":635,"attributeTypeName":"Acls","alert":true},{"attributeTypeId":167,"attributeTypeName":"AuditAccessFail","alert":true},{"attributeTypeId":168,"attributeTypeName":"AuditAccessPass","alert":true},{"attributeTypeId":5,"attributeTypeName":"AuditManageFail","alert":true},{"attributeTypeId":6,"attributeTypeName":"AuditManagePass","alert":true},{"attributeTypeId":44,"attributeTypeName":"IsFrozen","alert":true},{"attributeTypeId":86,"attributeTypeName":"LastModified","alert":true},{"attributeTypeId":52,"attributeTypeName":"OwnerGroupNumber","alert":true},{"attributeTypeId":89,"attributeTypeName":"OwnerUserId","alert":true},{"attributeTypeId":197,"attributeTypeName":"TextDesc","alert":true},{"attributeTypeId":199,"attributeTypeName":"WarningMode","alert":true}],"groups":[],"policies":[]}}&lt;/con:entry>&lt;con:entry xmlns:con="http://eviware.com/soapui/config"/>&lt;/xml-fragment></row>
+          <recognizeAsPlainText>true</recognizeAsPlainText>
+        </con:configuration>
+      </con:dataSource>
+      <con:shared>true</con:shared>
+      <con:restartShared>true</con:restartShared>
+      <con:property>monitor</con:property>
+      <con:completeLastOperation>true</con:completeLastOperation>
+      <con:restartOnRun>true</con:restartOnRun>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="run_monitor" id="7158c9ce-0dd2-41e1-a62f-d80ca4470042">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-loader/api/collection/run/{monitorId}" methodName="runMonitorNow" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="run_monitor" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="1a2d1144-138b-47a1-a0c5-90dce31aed42" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="create_monitor" id="02d72481-6ac0-4ed0-a448-86e7f86e6e9f">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-loader/api/monitor/" methodName="createMonitor" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="create_monitor" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request>${DataSource#monitor}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="JsonPath Count" id="49416787-e39e-4ce4-a51d-bd92ade162a9" name="Error count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="1d44e70a-87fd-436b-bc2a-22456beba348" name="MonitorName is correct" disabled="true">
+          <con:configuration>
+            <path>$['monitor']['monitorName']</path>
+            <content>ApiUserMonitor</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="MonitorId" value="${#TestSuite#currentMonitorID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="saveCurrentMonitorId" id="5acb5cb2-b077-4a19-95ff-d2950113a81a">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+		def response=context.expand('${create_monitor#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		currentID = json['monitor']['monitorId']
+		//log.info currentID
+
+		testRunner.testCase.testSuite.setPropertyValue( 'currentMonitorID', currentID.toString())</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="delete_monitor" id="3b43faae-e0e6-4f4f-9d59-2a75d4028679" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-loader/api/monitor/{monitorId}" methodName="deleteMonitor" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="delete_monitor" id="16c170dc-6741-472b-9d52-20fdd2554ee2" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/api/monitor/2662</con:originalUri>
+        <con:assertion type="JsonPath Count" id="49416787-e39e-4ce4-a51d-bd92ade162a9" name="Error count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="1d44e70a-87fd-436b-bc2a-22456beba348" name="MonitorId is correct">
+          <con:configuration>
+            <path>$['monitor']['monitorId']</path>
+            <content>${#TestSuite#currentMonitorID}</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>Inherit From Parent</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="monitorId" value="${#TestSuite#currentMonitorID}"/>
+          <con:entry key="setActive" value="true"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="MonitorId" value="${#TestSuite#currentMonitorID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>monitorId</con:entry>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry/>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="datasourceloop" name="DataSource Loop" id="bc61c194-18ea-4a2e-8a5f-094245557eec">
+    <con:settings/>
+    <con:config>
+      <dataSourceStep>DataSource</dataSourceStep>
+      <targetStep>create_monitor</targetStep>
+      <discardResults>true</discardResults>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="datasink" name="DataSink" id="b5435d26-ae6c-4575-bd16-006fb4a4df27" disabled="true">
+    <con:settings/>
+    <con:config xsi:type="con:DataSinkStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:properties/>
+    </con:config>
+  </con:testStep>
+  <con:properties/>
+  <con:reportParameters/>
+  <con:breakPoints>
+    <con:testStepId>88195991-cbf3-4bea-a987-accbd654e3e1</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>a713e12c-4c8d-4afa-a288-e57693fbb590</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>c1b71bdf-03f3-4a24-975c-4c0327903bbb</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>bc61c194-18ea-4a2e-8a5f-094245557eec</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>5acb5cb2-b077-4a19-95ff-d2950113a81a</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>7158c9ce-0dd2-41e1-a62f-d80ca4470042</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>3b43faae-e0e6-4f4f-9d59-2a75d4028679</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>82672adb-96c1-4286-bf80-2a94ea8f689a</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>02d72481-6ac0-4ed0-a448-86e7f86e6e9f</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>b5435d26-ae6c-4575-bd16-006fb4a4df27</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:environmentSpec>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:testCase>

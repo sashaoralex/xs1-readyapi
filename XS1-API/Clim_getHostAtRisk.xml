@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:resource name="Clim_getHostAtRisk" path="/xs1/xs1-clim/clim/host/{hostid}/noncompliant" id="fc6d92ff-1569-426c-add5-ce93922b5f11" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="fc6d92ff-1569-426c-add5-ce93922b5f11fileName">Clim_getHostAtRisk</con:setting>
+  </con:settings>
+  <con:parameters>
+    <con:parameter required="true">
+      <con:name>hostid</con:name>
+      <con:value>hostid</con:value>
+      <con:style>TEMPLATE</con:style>
+      <con:default>hostid</con:default>
+    </con:parameter>
+    <con:parameter required="true">
+      <con:name>X-XSRF-TOKEN</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+    <con:parameter required="true">
+      <con:name>Cookie</con:name>
+      <con:value/>
+      <con:style>HEADER</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+    <con:parameter required="true">
+      <con:name>gridParameters</con:name>
+      <con:value/>
+      <con:style>QUERY</con:style>
+      <con:default/>
+      <con:description xsi:nil="true"/>
+    </con:parameter>
+  </con:parameters>
+  <con:method name="getHostAtRisk" id="d68ec283-52e8-4a2a-9e09-10e486c58fcf" method="GET">
+    <con:settings/>
+    <con:parameters/>
+    <con:representation type="RESPONSE">
+      <con:mediaType>application/json;charset=UTF-8</con:mediaType>
+      <con:status>200</con:status>
+      <con:params/>
+      <con:element xmlns:host="https://xs1qa2.xypro.com/xs1/xs1-clim/api/clim/host">host:Response</con:element>
+    </con:representation>
+    <con:request name="Request 1" id="8f8de962-9f6b-449a-9a79-a57f61842a38" mediaType="application/json">
+      <con:settings/>
+      <con:endpoint>https://xs1qa3.xypro.com</con:endpoint>
+      <con:request/>
+      <con:credentials>
+        <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+        <con:authType>No Authorization</con:authType>
+      </con:credentials>
+      <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+      <con:parameters>
+        <con:entry key="Cookie" value="${#Project#cookie} "/>
+        <con:entry key="gridParameters" value="{&quot;skip&quot;:0,&quot;take&quot;:25,&quot;filter&quot;:{&quot;logic&quot;:&quot;and&quot;,&quot;filters&quot;:[]},&quot;sortField&quot;:&quot;severity&quot;,&quot;sortDir&quot;:&quot;asc&quot;}"/>
+        <con:entry key="X-XSRF-TOKEN" value="${#Project#token} "/>
+        <con:entry key="hostid" value="${#Project#currentHostId}"/>
+      </con:parameters>
+      <con:parameterOrder>
+        <con:entry>X-XSRF-TOKEN</con:entry>
+        <con:entry>Cookie</con:entry>
+        <con:entry>hostid</con:entry>
+        <con:entry>gridParameters</con:entry>
+      </con:parameterOrder>
+      <con:environmentSpec>
+        <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+          <con:authProfile>Inherit From Parent</con:authProfile>
+        </con:entry>
+      </con:environmentSpec>
+    </con:request>
+    <con:environmentSpec>
+      <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+        <con:authProfile>Inherit From Parent</con:authProfile>
+      </con:entry>
+    </con:environmentSpec>
+  </con:method>
+  <con:environmentSpec>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:resource>

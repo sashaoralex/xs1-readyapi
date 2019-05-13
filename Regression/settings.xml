@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testSuite id="158c6748-3257-4084-a80b-78f6e8b086a1" name="Regression" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="IncludeOverview">true</con:setting>
+    <con:setting id="IncludeResults">true</con:setting>
+    <con:setting id="FlowLayout">false</con:setting>
+    <con:setting id="ErrorDetails">true</con:setting>
+    <con:setting id="IncludeCoverage">true</con:setting>
+    <con:setting id="158c6748-3257-4084-a80b-78f6e8b086a1fileName">Regression</con:setting>
+  </con:settings>
+  <con:savedRecentRuns>1</con:savedRecentRuns>
+  <con:runType>SEQUENTIAL</con:runType>
+  <con:properties>
+    <con:property>
+      <con:name>currentMonitorID</con:name>
+      <con:value xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">510</con:value>
+    </con:property>
+    <con:property>
+      <con:name>currentGroupID</con:name>
+      <con:value>315</con:value>
+    </con:property>
+    <con:property>
+      <con:name>currentEntityID</con:name>
+      <con:value>47472143</con:value>
+    </con:property>
+    <con:property>
+      <con:name>currentAlertID</con:name>
+      <con:value>52778893</con:value>
+    </con:property>
+    <con:property>
+      <con:name>currentRuleID</con:name>
+      <con:value>18</con:value>
+    </con:property>
+    <con:property>
+      <con:name>currentUserId</con:name>
+      <con:value>249</con:value>
+    </con:property>
+    <con:property>
+      <con:name>viewID</con:name>
+      <con:value>6V1JLKQG</con:value>
+    </con:property>
+    <con:property>
+      <con:name>monitorIDView</con:name>
+      <con:value>monitors-508</con:value>
+    </con:property>
+    <con:property>
+      <con:name>monitorGridView</con:name>
+      <con:value>alerts-508</con:value>
+    </con:property>
+    <con:property>
+      <con:name>currentIncidentID</con:name>
+      <con:value>69</con:value>
+    </con:property>
+    <con:property>
+      <con:name>total_incidents</con:name>
+      <con:value>13</con:value>
+    </con:property>
+    <con:property>
+      <con:name>currentGroupID2</con:name>
+      <con:value>316</con:value>
+    </con:property>
+    <con:property>
+      <con:name>currentOccurrenceID</con:name>
+      <con:value>333120</con:value>
+    </con:property>
+  </con:properties>
+  <con:reportParameters/>
+  <con:environmentSpec>
+    <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:testSuite>

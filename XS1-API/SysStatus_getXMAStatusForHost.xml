@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:resource name="SysStatus_getXMAStatusForHost" path="/xs1/xs1-notification/api/xma/status" id="bf073d08-cb3e-49ae-8f99-5f15636d3d72" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="bf073d08-cb3e-49ae-8f99-5f15636d3d72fileName">SysStatus_getXMAStatusForHost</con:setting>
+  </con:settings>
+  <con:parameters>
+    <con:parameter required="true">
+      <con:name>hostName</con:name>
+      <con:value>\GALAXY</con:value>
+      <con:style>QUERY</con:style>
+      <con:default>\GALAXY</con:default>
+    </con:parameter>
+  </con:parameters>
+  <con:method name="getXMAStatusForHost" id="5cf8efce-8bf0-423e-a0af-4ec79e71a408" method="GET">
+    <con:settings/>
+    <con:parameters>
+      <con:parameter required="true">
+        <con:name>X-XSRF-TOKEN</con:name>
+        <con:value/>
+        <con:style>HEADER</con:style>
+        <con:default/>
+      </con:parameter>
+      <con:parameter required="true">
+        <con:name>Cookie</con:name>
+        <con:value/>
+        <con:style>HEADER</con:style>
+        <con:default/>
+      </con:parameter>
+    </con:parameters>
+    <con:representation type="FAULT">
+      <con:mediaType xsi:nil="true"/>
+      <con:status>401</con:status>
+      <con:params/>
+      <con:element>data</con:element>
+    </con:representation>
+    <con:representation type="RESPONSE">
+      <con:mediaType>application/json;charset=UTF-8</con:mediaType>
+      <con:status>200</con:status>
+      <con:params/>
+      <con:element xmlns:stat="https://xs1qa2.xypro.com/xs1/xs1-notification/api/xma/status">stat:Response</con:element>
+    </con:representation>
+    <con:request name="Request 1" id="d7c321b9-92ca-41e8-895d-facd61b2c06f" mediaType="application/json">
+      <con:settings/>
+      <con:endpoint>https://xs1qa2.xypro.com</con:endpoint>
+      <con:request/>
+      <con:credentials>
+        <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+        <con:authType>No Authorization</con:authType>
+      </con:credentials>
+      <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+      <con:parameters/>
+      <con:parameterOrder>
+        <con:entry>hostName</con:entry>
+        <con:entry>X-XSRF-TOKEN</con:entry>
+        <con:entry>Cookie</con:entry>
+      </con:parameterOrder>
+    </con:request>
+  </con:method>
+</con:resource>

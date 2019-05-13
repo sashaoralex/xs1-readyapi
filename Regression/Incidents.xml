@@ -1,0 +1,2828 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<con:testCase id="cd8e4dfa-67e8-449b-8e23-5c2671f551f8" discardOkResults="true" failOnError="false" failTestCaseOnErrors="true" keepSession="false" name="Incidents" searchProperties="true" timeout="0" xmlns:con="http://eviware.com/soapui/config">
+  <con:settings>
+    <con:setting id="cd8e4dfa-67e8-449b-8e23-5c2671f551f8fileName">Incidents</con:setting>
+  </con:settings>
+  <con:savedRecentRuns>1</con:savedRecentRuns>
+  <con:testStep type="groovy" name="NotToAbortOnError" id="a7c96fc1-b43b-4c8c-a11e-f4fa8077176d">
+    <con:settings/>
+    <con:config>
+      <script>testRunner.testCase.testSuite.project.getTestSuiteList().each
+{
+   it.getTestCaseList().each
+   {
+      //Switch the parameter value to 'true' if you need to enable 'Abort on Error' option
+      it.setFailOnError(false)
+   }
+}</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Login" id="a5b4583a-dcd5-4b1d-91e5-4f1038665382">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/login" methodName="login" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Login" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/x-www-form-urlencoded" postQueryString="true">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;entry key="timezone-offset" value="-7" xmlns="http://eviware.com/soapui/config"/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="JsonPath Match" id="75fc935a-dfe4-4f6e-9029-a1939d6e560f" name="Login = true">
+          <con:configuration>
+            <path>$['login']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="c331986e-69e1-4678-8faa-f778df0d8cdc" name="userName = xs1apiregression">
+          <con:configuration>
+            <path>$['userName']</path>
+            <content>xs1apiregression</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="b69bfbb7-b5b8-4b78-a093-323444201326">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -2001" id="30682cbd-4788-419e-ab1a-786fe1f93f79">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="070abd4e-2b4a-48ce-8de5-1733bbe903e5">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="password" value="${#Project#password}"/>
+          <con:entry key="username" value="${#Project#username}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>username</con:entry>
+          <con:entry>password</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="setTokenAndCookie" id="d454f325-5ebe-4faf-9f6f-519f158db077">
+    <con:settings/>
+    <con:config>
+      <script>def val = testRunner.testCase.testSteps['Login'].testRequest.response.getResponseHeaders()
+loggedInValue = "true"
+
+Map&lt;String,List> values  = new HashMap&lt;String,String>();
+
+for(int j = 0; j &lt; val.get("Set-Cookie").size(); j++)
+{
+	
+	def cjar = val.get("Set-Cookie")[j]
+	def cookies = cjar.tokenize("\\;")
+	
+	cookies.each() 
+	{ cookie ->
+    	def pair = cookie.tokenize("\\=")
+    	values.put(pair[0], pair[1])
+    
+    		log.info( "Key: " + pair[0] + ", Val: " + pair[1] )
+	}
+}
+
+		values.keySet()
+		if (values.get("SESSION") == null)
+		{
+			loggedInValue = "false"
+		}
+		log.info("LOGGED IN: " + loggedInValue)
+		testRunner.testCase.testSuite.project.setPropertyValue("loggedIn", loggedInValue)
+		testRunner.testCase.testSuite.project.setPropertyValue( 'token', values.get("XSRF-TOKEN"))
+		testRunner.testCase.testSuite.project.setPropertyValue( 'cookie', "SESSION="+values.get("SESSION" ))
+
+		//Generate TransactionID
+		//def random = (int)(Math.random()*1000);
+          //testRunner.testCase.testSuite.project.setPropertyValue("RandomID", String.valueOf((int)(Math.random()*100000)) );</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_rule_patterns" id="ef10fb80-3222-48a0-87f5-9c14fa8889bf">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/patterns" methodName="getRulePatterns" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_rule_patterns" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="b3d3a5cb-a13c-4f49-8e12-4483cd130724" name="ruleId exists">
+          <con:configuration>
+            <path>$[0]['ruleId']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="b2841479-3d62-41d1-9c25-306d8cd59021">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="saveRuleId" id="44e85ee6-c8b8-4946-80b8-bbd4ad22ead2">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+		def response=context.expand('${get_rule_patterns#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		currentRuleID = json[0]['ruleId']
+		//log.info currentEntityID
+		log.info(json[0]['ruleId'].toString());
+		testRunner.testCase.testSuite.setPropertyValue( 'currentRuleID', currentRuleID.toString())</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_incidents_list" id="7537440c-cbf6-48fb-843b-8f39b0617421">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incidents/summary" methodName="getIncidentsList" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_incidents_list" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="d6cac425-a79d-4894-8b9c-a57653d8a367" name="JsonPath Existence Match">
+          <con:configuration>
+            <path>$['total']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="03a80384-24c6-4a3c-966b-ac84ddbfdd3d">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -2001" id="e397ed2e-8c57-48d9-8f6b-3a69d235b02f">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="02e88eab-00af-4ef4-a503-517be9343040">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;skip&quot;:0,&quot;take&quot;:25,&quot;filter&quot;:{&quot;logic&quot;:&quot;and&quot;,&quot;filters&quot;:[]},&quot;sortField&quot;:&quot;lastAlert&quot;,&quot;sortDir&quot;:&quot;desc&quot;,&quot;fromDate&quot;:&quot;2018-09-05T13:57:39-07:00&quot;,&quot;toDate&quot;:&quot;2055-09-10T13:57:39-07:00&quot;}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_metadata_view_rule OLGA" id="859d3255-f50a-4c81-ba62-e03b4d6223e8">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/metadata/view/rule/{ruleid}" methodName="getMetadataViewRule" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_metadata_view_rule OLGA" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="Simple NotContains" id="3de5b4ff-2386-45de-b1a4-599df8ca7d87" name="Does Not Contain Error">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="6888ab78-f9e0-4e88-910a-72a8fdb96bc6" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="adad03ae-a091-4b9f-97d4-ac029df329dc" name="Match content of [dataset]">
+          <con:configuration>
+            <path>$['dataset']</path>
+            <content>incidents-rule</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="a0588a41-8520-48f8-91c1-c0b01c164f17" name="Check for existence of [type]">
+          <con:configuration>
+            <path>$['type']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="ruleId" value="${#TestSuite#currentRuleID}"/>
+          <con:entry key="ruleid" value="${#TestSuite#currentRuleID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_incidents_for_rule_list_view" id="d1de8c16-2fa3-4d32-a863-29e2508e722c">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incidents/{incidentID}/events" methodName="getSpecificIncidentsExpandedViewV2" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_incidents_for_rule_list_view" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="7f5b629e-fbb4-4df2-b1e0-47f79530ca98" name="total exists">
+          <con:configuration>
+            <path>$['total']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="e5f43fe4-6d74-41af-90f7-148753e97806">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="09882948-4300-4d41-b5b3-a51552e37cb6">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="38c59e15-e604-40c0-b674-5cadb275847e">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="b8a1b638-c4e7-431b-8238-8ce2ec9487f4">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;skip&quot;:0,&quot;take&quot;:25,&quot;cleared&quot;:false,&quot;filter&quot;:{&quot;logic&quot;:&quot;and&quot;,&quot;filters&quot;:[]},&quot;fromDate&quot;:&quot;2018-08-10T15:49:00-07:00&quot;,&quot;toDate&quot;:&quot;2055-09-10T15:49:00-07:00&quot;,&quot;sortField&quot;:&quot;captureDateTime&quot;,&quot;sortDir&quot;:&quot;desc&quot;}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="incidentID" value="${#TestSuite#currentIncidentID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry>incidentID</con:entry>
+          <con:entry>gridParameters</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_incidents_for_rule_expanded_view_Sasha" id="ad550355-e025-4403-a7b7-23cad8cc5d31">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incidents/{incidentID}/list" methodName="getSpecificIncidentsListView" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_incidents_for_rule_expanded_view_Sasha" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="7f5b629e-fbb4-4df2-b1e0-47f79530ca98" name="JsonPath Existence Match">
+          <con:configuration>
+            <path>$['total']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes" id="e5f43fe4-6d74-41af-90f7-148753e97806">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="225e2970-a5f9-41c2-b6d1-af5bcd37195b">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="8d46b2d6-853c-4066-bb69-5c87bf9a77ce">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="8552e2be-d899-4aef-ac3d-4d11b25c1d8a">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;skip&quot;:0,&quot;take&quot;:25,&quot;cleared&quot;:false,&quot;filter&quot;:{&quot;logic&quot;:&quot;and&quot;,&quot;filters&quot;:[]},&quot;fromDate&quot;:&quot;2018-08-10T15:49:00-07:00&quot;,&quot;toDate&quot;:&quot;2055-09-10T15:49:00-07:00&quot;,&quot;sortField&quot;:&quot;captureDateTime&quot;,&quot;sortDir&quot;:&quot;desc&quot;}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="incidentID" value="${#TestSuite#currentIncidentID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry>incidentID</con:entry>
+          <con:entry>gridParameters</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="saveIncidentId" id="c302ae52-e2ad-402f-9922-d4275ef1f4f8">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+		def response=context.expand('${get_incidents_list#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		currentIncidentID = json['items'][0]['id']
+		//log.info currentEntityID
+		log.info(currentIncidentID);
+		testRunner.testCase.testSuite.setPropertyValue( 'currentIncidentID', currentIncidentID.toString())</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_occurrences_for_incident_standard_view" id="2b3e3757-4c4d-474e-8bf0-4808681a9d7a">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incidents/{incidentID}" methodName="getSpecificIncidentsList" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_occurrences_for_incident_standard_view" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="7f5b629e-fbb4-4df2-b1e0-47f79530ca98" name="JsonPath Existence Match">
+          <con:configuration>
+            <path>$['total']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="8934b310-2468-47e8-8f7e-785e7be39ceb">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -2001" id="63dc4417-575d-47ef-8859-936cebb43270">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="44e4a63c-7a50-4fdb-8e1d-752b5303d231">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;skip&quot;:0,&quot;take&quot;:25,&quot;cleared&quot;:false,&quot;filter&quot;:{&quot;logic&quot;:&quot;and&quot;,&quot;filters&quot;:[]},&quot;fromDate&quot;:&quot;2018-08-10T15:49:00-07:00&quot;,&quot;toDate&quot;:&quot;2055-09-10T15:49:00-07:00&quot;,&quot;sortField&quot;:&quot;captureDateTime&quot;,&quot;sortDir&quot;:&quot;desc&quot;}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="incidentID" value="${#TestSuite#currentIncidentID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry>incidentID</con:entry>
+          <con:entry>gridParameters</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="saveOccurrenceId" id="650a2e23-bea3-49aa-8ced-1b16cbaf9581">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+		def response=context.expand('${get_occurrences_for_incident_standard_view#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		currentOccurrenceID = json['items'][0]['incidentId']
+		//log.info currentEntityID
+		log.info(currentOccurrenceID);
+		testRunner.testCase.testSuite.setPropertyValue( 'currentOccurrenceID', currentOccurrenceID.toString())</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_cleared_occurrences_for_incident_standard_view" id="e534e3bd-b392-4040-8317-2d32ad929ff9">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incidents/{incidentID}" methodName="getSpecificIncidentsList" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_cleared_occurrences_for_incident_standard_view" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="7f5b629e-fbb4-4df2-b1e0-47f79530ca98" name="JsonPath Existence Match">
+          <con:configuration>
+            <path>$['total']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="3aea4cd8-7dd0-4a62-95f5-5fa15b0c2d26">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -2001" id="97abd75c-94a7-4985-acc6-8957cc6a0bb0">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="57697a23-b6be-4c90-a5ac-af10297870ca">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;skip&quot;:0,&quot;take&quot;:25,&quot;cleared&quot;:true,&quot;filter&quot;:{&quot;logic&quot;:&quot;and&quot;,&quot;filters&quot;:[]},&quot;fromDate&quot;:&quot;2018-08-10T15:49:00-07:00&quot;,&quot;toDate&quot;:&quot;2055-09-10T15:49:00-07:00&quot;,&quot;sortField&quot;:&quot;captureDateTime&quot;,&quot;sortDir&quot;:&quot;desc&quot;}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="incidentID" value="${#TestSuite#currentIncidentID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry>incidentID</con:entry>
+          <con:entry>gridParameters</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="saveTotal" id="2cbec5fb-fd33-4560-ba9a-4a3390e079d1">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+		def response=context.expand('${get_cleared_occurrences_for_incident_standard_view#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		total_incidents = json['total']
+		//log.info currentEntityID
+		log.info(json['total']);
+		testRunner.testCase.testSuite.setPropertyValue( 'total_incidents', total_incidents.toString())</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="clear_specific_occurrence" id="046c2a7f-d904-4716-a8c2-4f796fd6d1a1">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incidents/clear" methodName="clearSpecificIncident" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="clear_specific_occurrence" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>[${#TestSuite#currentOccurrenceID}]</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" id="64b1c436-fd3c-4e6e-af98-bdc9ed79824b" name="Valid HTTP Status Codes">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="2c453c4b-b49c-498a-b84f-d0344e016e71">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="c4d9b879-ec2b-45f4-b520-d8116b053143">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="9f722221-ff11-4e3d-b86d-c5a4415bf460">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;skip&quot;:0,&quot;take&quot;:25,&quot;cleared&quot;:false,&quot;filter&quot;:{&quot;logic&quot;:&quot;and&quot;,&quot;filters&quot;:[]},&quot;fromDate&quot;:&quot;2018-08-10T15:49:00-07:00&quot;,&quot;toDate&quot;:&quot;2018-09-10T15:49:00-07:00&quot;,&quot;sortField&quot;:&quot;captureDateTime&quot;,&quot;sortDir&quot;:&quot;desc&quot;}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="ruleID" value="${#TestSuite#currentRuleID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_cleared_occurrences_for_incident_standard_view_to_check_total_cleared" id="8fd46d84-7f54-4831-a658-1820b57c3469">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incidents/{incidentID}" methodName="getSpecificIncidentsList" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_cleared_occurrences_for_incident_standard_view_to_check_total_cleared" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="7f5b629e-fbb4-4df2-b1e0-47f79530ca98" name="JsonPath Existence Match">
+          <con:configuration>
+            <path>$['total']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="3fb653c9-325b-49c6-b85e-e163410a4f01">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -2001" id="8c8e45d8-4fa9-4bf5-85e3-cedcaf4bf046">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="97540b90-6367-4d94-b550-358c8f00bcb2">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;skip&quot;:0,&quot;take&quot;:25,&quot;cleared&quot;:true,&quot;filter&quot;:{&quot;logic&quot;:&quot;and&quot;,&quot;filters&quot;:[]},&quot;fromDate&quot;:&quot;2018-08-10T15:49:00-07:00&quot;,&quot;toDate&quot;:&quot;2055-09-10T15:49:00-07:00&quot;,&quot;sortField&quot;:&quot;captureDateTime&quot;,&quot;sortDir&quot;:&quot;desc&quot;}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="incidentID" value="${#TestSuite#currentIncidentID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry>incidentID</con:entry>
+          <con:entry>gridParameters</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="compareToTotal" id="64f1c756-d3ed-432e-82b0-a75bb5c9d932">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+		def response=context.expand('${get_cleared_occurrences_for_incident_standard_view_to_check_total_cleared#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		def prevTotal = testRunner.testCase.testSuite.getPropertyValue('total_incidents')
+		//log.info currentEntityID
+		log.info(json['total']);
+		if(!prevTotal.equals(json['total'])){
+			return true
+		}
+		else{
+			assert true : "Cleared Occurences count did not change"
+			return false
+			}</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="assertionteststep" name="totalChanged" id="4359db48-b281-4701-957e-40d79cc26c79">
+    <con:settings/>
+    <con:config xsi:type="con:AssertionTestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:entry>
+        <con:id>361c5ac4-0887-4493-a274-0fbf89c29976</con:id>
+        <con:isGroup>false</con:isGroup>
+        <con:sourceId>64f1c756-d3ed-432e-82b0-a75bb5c9d932</con:sourceId>
+        <con:propertyName>result</con:propertyName>
+        <con:assertion type="Simple Equals" name="Equals" id="bd945719-8181-4fcd-bfd3-9fdfd93834c0">
+          <con:configuration>
+            <patternText>true</patternText>
+            <caseSensitive>true</caseSensitive>
+          </con:configuration>
+        </con:assertion>
+      </con:entry>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="deactivate_rule" id="4adef10f-8a35-48d7-9722-c8c741f5fdf2">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/pattern/{ruleId}/active/false" methodName="deactivateRule" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="deactivate_rule" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="Simple NotContains" id="3de5b4ff-2386-45de-b1a4-599df8ca7d87" name="Does Not Contain Error">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="6888ab78-f9e0-4e88-910a-72a8fdb96bc6" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="20bcf585-41e8-4e3e-946b-847f584d3b8c">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="d890c474-1abe-4d13-8dd3-4be0c97756db">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="ef8cd515-3fde-4be8-afb8-e7b3d5834238">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="ruleId" value="${#TestSuite#currentRuleID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="update_rule_severity_Critical" id="bcffdd0d-a0c0-4a65-ab67-4bf742651fdf">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/pattern/{ruleId}/severity/Critical" methodName="changeRuleSeverity" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="update_rule_severity_Critical" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="Simple NotContains" id="3de5b4ff-2386-45de-b1a4-599df8ca7d87" name="Does Not Contain Error">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="6888ab78-f9e0-4e88-910a-72a8fdb96bc6" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="bc870b94-f071-4867-a504-af80376c32cd">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="1d4df685-9d5c-40f9-9342-0b1eac5c0c64">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="629d5b6e-35f7-4fa0-859a-da07e728aab3">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="ruleId" value="${#TestSuite#currentRuleID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="update_when_triggered_don't_send_an_email" id="8ae0520d-9624-461d-a612-a664e4c6958d">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/pattern/{ruleId}/email/false" methodName="changeWhenTriggeredNO" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="update_when_triggered_don't_send_an_email" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="Simple NotContains" id="3de5b4ff-2386-45de-b1a4-599df8ca7d87" name="Does Not Contain Error">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="6888ab78-f9e0-4e88-910a-72a8fdb96bc6" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="2d80aec6-3117-45db-968f-19248c874432">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="9fbf64d9-11de-4bc4-bc1c-1bbef5ffdb63">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="64a9e23e-0f40-4218-8e23-54a1b5441501">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="ruleId" value="${#TestSuite#currentRuleID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_list_to_validate_1" id="2bd65c99-f10a-40f6-8a2b-f711bcd5be59">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/patterns" methodName="getRulePatterns" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_list_to_validate_1" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="91059029-2122-4f95-b615-308281bda53a" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="24c0d10a-e510-4df3-af2e-6c646f5c12eb" name="Match content of [severity] - CRITICAL">
+          <con:configuration>
+            <path>$[0]['severity']</path>
+            <content>Critical</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="df5f1b39-86e9-43b3-b9c9-57b6ecf59ced" name="Match content of [emailAlertEnabled] - FALSE">
+          <con:configuration>
+            <path>$[0]['emailAlertEnabled']</path>
+            <content>false</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="eba7ba63-733e-4592-82a0-bcb61be36749">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="3b0a27ac-bbd7-49d5-9ab7-a4483f3c9d83">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="202f52ca-146e-4c53-9c86-8371b2df0a06">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="update_rule_severity_Major" id="2473d5a0-6c3a-4e12-b664-2a640a70fe59">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/pattern/{ruleId}/severity/Major" methodName="changeRuleSeverity" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="update_rule_severity_Major" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="Simple NotContains" id="3de5b4ff-2386-45de-b1a4-599df8ca7d87" name="Does Not Contain Error">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="6888ab78-f9e0-4e88-910a-72a8fdb96bc6" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="f0968ba2-7ce9-444f-a3c5-e74a4fb09741">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="a63c8e89-7d86-42ad-aede-4922193e1b8f">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="6377b288-0505-43ae-b986-1796d85669bb">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="ruleId" value="${#TestSuite#currentRuleID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="update_when_triggered_send_an_email" id="490c4648-acc1-47b3-996b-bca2318272a7">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/pattern/{ruleId}/email/true" methodName="changeWhenTriggeredYES" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="update_when_triggered_send_an_email" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="Simple NotContains" id="3de5b4ff-2386-45de-b1a4-599df8ca7d87" name="Does Not Contain Error">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="6888ab78-f9e0-4e88-910a-72a8fdb96bc6" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="0e7fda4a-aee7-4bb4-be37-736ed5938ab0">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="a429ba82-e199-41be-ab5e-a2dc377ea666">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="5b4bdf40-18ba-4fdd-9abd-559ed18bb7d1">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="ruleId" value="${#TestSuite#currentRuleID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="activate_rule" id="d8fe5a29-15a0-4286-b6f4-6f78cb4b37ea">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/pattern/{ruleId}/active/true" methodName="activateRule" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="activate_rule" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="Simple NotContains" id="3de5b4ff-2386-45de-b1a4-599df8ca7d87" name="Does Not Contain Error">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="6888ab78-f9e0-4e88-910a-72a8fdb96bc6" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="cd423f9e-2cb1-49a6-984f-f21f720e0a32">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="af029163-d96e-4750-8090-f2a01153c36f">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="143eec0a-c715-4954-9a5f-2ddb87e12b36">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+          <con:entry key="ruleId" value="${#TestSuite#currentRuleID}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_list_to_validate2" id="caacace4-169e-4d3c-b406-d688cb09c9a4">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/patterns" methodName="getRulePatterns" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_list_to_validate2" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="9255e581-7fc3-4fad-b94c-7b4ec40e0869" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="b7fae5ea-25e4-4084-a690-88012a1f5346" name="active = true">
+          <con:configuration>
+            <path>$[1]['active']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="c14d0e58-43b7-4546-896b-9307459d2192">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="30e6a848-c516-462e-bd89-0eed2dbbbc77">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="edd2a4b1-47e7-4685-978b-89a543186461">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="saveConfigRuleId" id="f329a72b-5510-4425-8004-3c72f5ccf5a2">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+
+		//get and parse response
+		def response=context.expand('${get_list_to_validate2#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		size = json.size();
+		
+		//set the rule name
+		def ruleName ="MultipleLoginsDifferentUsersXUA"
+		log.info("Name = " + ruleName)
+		testRunner.testCase.testSuite.project.setPropertyValue("ruleName", ruleName);
+		
+		//look through all rules
+		for(int i = 0; i &lt; size; i++){
+			
+			//if a configurable rule is found
+			if(json[i]['name'].equals(ruleName)){
+				log.info(i);
+				log.info(json[i]['ruleId'].toString());
+				
+				//save location of rule
+				testRunner.testCase.testSuite.project.setPropertyValue("ruleLocation", i.toString());
+				testRunner.testCase.testSuite.project.setPropertyValue("currentRuleUpdateID", json[i]['ruleId'].toString());
+
+			}
+		}</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="clone_rule" id="f4e81b7a-08f4-4e18-9ecc-f5dac4a9cdb0">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/rule/clone" methodName="cloneRule" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="clone_rule" id="2a981682-e73a-431e-a1e8-7db696db52f5" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{"ruleId":${#Project#currentRuleUpdateID},"displayName":"Multiple NonStop user sessions-XUA-CLONE1","description":"A terminal has logged into multiple sessions from the same IP address with different user names. Verify this is normal user activity.","turnOffBaseRule":false}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/pattern</con:originalUri>
+        <con:assertion type="Simple NotContains" id="57eee0d4-5cc3-4fd1-8957-b3f85d61365b" name="Does Not Contain Error">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="3df4dfc0-779e-4228-9457-9c2a63d99b42" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="update_rule_paramsDONOTACTIVATE - changes original rule configuration" id="9b13fa3a-445a-46b2-b475-20de37301bd5" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/pattern" methodName="updateRulePattern" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="update_rule_paramsDONOTACTIVATE - changes original rule configuration" id="2a981682-e73a-431e-a1e8-7db696db52f5" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{"ruleId":${#Project#currentRuleUpdateID},"name":"MultipleLoginsDifferentUsersXUA","description":"A terminal has logged into multiple sessions from the same IP address with different user names. Verify this is normal user activity.","displayName":"Multiple NonStop user sessions-XUA","suppressOverlappingMatches":true,"defaultPattern":{"operator":"followedBy","pattern":[{"operator":"every","pattern":{"operator":"filter","field":"FirstSuccessfulLogon","type":"MAEvent","name":"FIRSTSUCCESSFULLOGON","pattern":{"operator":"globalExpression","field":"XUALOGON","alias":"a"}}},{"operator":"timeWindow","minutes":5,"pattern":{"operator":"filter","field":"SubsequentSuccessfulLogon","type":"MAEvent","reusable":false,"name":"SUBSEQSUCCESSFULLOGON","pattern":{"operator":"and","pattern":[{"operator":"globalExpression","field":"XUALOGON","alias":"b"},{"operator":"eqProperty","field":"install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"},{"operator":"neqProperty","field":"audit_targetlogin","value":"FirstSuccessfulLogon.audit_targetlogin","reference":"a"}]}}},{"operator":"repeat","value":0,"pattern":{"operator":"filter","field":"AdditionalSuccessfulLogon","type":"MAEvent","reusable":false,"name":"XUALOGON","pattern":{"operator":"and","pattern":[{"operator":"globalExpression","field":"XUALOGON","alias":"c"},{"operator":"eqProperty","field":"install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"}]}},"until":{"operator":"interval","minutes":5}}]},"displayPattern":{"operator":"followedBy","pattern":[{"operator":"every","pattern":{"operator":"filter","field":"FirstSuccessfulLogon","type":"MAEvent","name":"FIRSTSUCCESSFULLOGON","pattern":{"operator":"globalExpression","field":"XUALOGON","alias":"a"}}},{"operator":"timeWindow","minutes":7,"pattern":{"operator":"filter","field":"SubsequentSuccessfulLogon","type":"MAEvent","reusable":false,"name":"SUBSEQSUCCESSFULLOGON","pattern":{"operator":"and","pattern":[{"operator":"globalExpression","field":"XUALOGON","alias":"b"},{"operator":"eqProperty","field":"install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"},{"operator":"neqProperty","field":"audit_targetlogin","value":"FirstSuccessfulLogon.audit_targetlogin","reference":"a"}]}}},{"operator":"repeat","value":1,"pattern":{"operator":"filter","field":"AdditionalSuccessfulLogon","type":"MAEvent","reusable":false,"name":"XUALOGON","pattern":{"operator":"and","pattern":[{"operator":"globalExpression","field":"XUALOGON","alias":"c"},{"operator":"eqProperty","field":"install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"}]}},"until":{"operator":"interval","minutes":6}}]},"active":true,"published":true,"emailAlertEnabled":true,"severity":"Major","events":[{"id":"XUALOGON","name":"User Logon XUA","ref":"a","hierarchy":["every","filter","globalExpression"],"type":"event","config":{},"connectors":[]},{"id":"XUALOGON","name":"User Logon XUA","ref":"b","hierarchy":["timeWindow","filter","and"],"type":"event","config":{"timeWindow":7},"connectors":[{"operator":"eqProperty","field":"b.install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"b.session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"},{"operator":"neqProperty","field":"b.audit_targetlogin","value":"FirstSuccessfulLogon.audit_targetlogin","reference":"a"}]},{"id":"XUALOGON","name":"User Logon XUA","ref":"c","hierarchy":["repeat","filter","and"],"type":"event","config":{"until":"6","repeat":1},"connectors":[{"operator":"eqProperty","field":"c.install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"c.session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"}]}]}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/pattern</con:originalUri>
+        <con:assertion type="Simple NotContains" id="57eee0d4-5cc3-4fd1-8957-b3f85d61365b" name="Does Not Contain Error">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="3df4dfc0-779e-4228-9457-9c2a63d99b42" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="0c65a230-82d7-4270-a213-fed7495b249a">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="70b30b3f-8bb6-466b-bfad-aacade64d91a">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="8e430ff9-41ed-4fa8-9a60-13422efeba80">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_list_to_validate3" id="cc34efc7-988a-4cf0-9b08-da14fb308f10">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/patterns" methodName="getRulePatterns" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_list_to_validate3" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="38f43fe2-3bb0-4718-b20c-7dddcacbccac" name="JsonPath Match" disabled="true">
+          <con:configuration>
+            <path>$[16]['displayPattern']['pattern'][1]['minutes']</path>
+            <content>7</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="fa9ae6a2-663b-4b63-8e50-96b9dcfa1462">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -2001" id="cde01d86-ad57-4e81-98fc-f944c5b16b45">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="d2ebf686-fb22-495d-90c6-0c45279594a7">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="confirmChanged" id="1c6bc3d7-de5d-4910-be2c-69eae904aa3b">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+
+		//get and parse response
+		def response=context.expand('${get_list_to_validate3#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		def location = testRunner.testCase.testSuite.project.getPropertyValue("ruleLocation").toInteger();
+		def ruleName = testRunner.testCase.testSuite.project.getPropertyValue("ruleName");
+		log.info(location);
+		log.info(ruleName)
+		
+		if(!json[location]["name"].equals(ruleName)){
+			log.info("Rule name at location doesn't match expected output")
+			return false;
+		}
+		//check for correct information
+		withinMinutes = (json[location]['displayPattern']['pattern'][1]['minutes'] == 7);
+		log.info(withinMinutes)
+		repeatCount = (json[location]['displayPattern']['pattern'][2]['value'] == 1);
+		log.info(repeatCount)
+		repeatFor = (json[location]['displayPattern']['pattern'][2]['until']['minutes'] == 6);
+		log.info(repeatFor)
+		return(withinMinutes &amp;&amp; repeatCount &amp;&amp; repeatFor);</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="restore_default_rule_paramDONOTACTIVATE - chnges original rule configuration" id="1d764bd3-0dcf-49e5-b130-2004f69c469f" disabled="true">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/pattern" methodName="updateRulePattern" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="restore_default_rule_paramDONOTACTIVATE - chnges original rule configuration" id="2a981682-e73a-431e-a1e8-7db696db52f5" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request>{"ruleId":${#Project#currentRuleID},"name":"MultipleLoginsDifferentUsersXUA","description":"A terminal has logged into multiple sessions from the same IP address with different user names. Verify this is normal user activity.","displayName":"Multiple NonStop user sessions-XUA","suppressOverlappingMatches":true,"defaultPattern":{"operator":"followedBy","pattern":[{"operator":"every","pattern":{"operator":"filter","field":"FirstSuccessfulLogon","type":"MAEvent","name":"FIRSTSUCCESSFULLOGON","pattern":{"operator":"globalExpression","field":"XUALOGON","alias":"a"}}},{"operator":"timeWindow","minutes":5,"pattern":{"operator":"filter","field":"SubsequentSuccessfulLogon","type":"MAEvent","reusable":false,"name":"SUBSEQSUCCESSFULLOGON","pattern":{"operator":"and","pattern":[{"operator":"globalExpression","field":"XUALOGON","alias":"b"},{"operator":"eqProperty","field":"install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"},{"operator":"neqProperty","field":"audit_targetlogin","value":"FirstSuccessfulLogon.audit_targetlogin","reference":"a"}]}}},{"operator":"repeat","value":0,"pattern":{"operator":"filter","field":"AdditionalSuccessfulLogon","type":"MAEvent","reusable":false,"name":"XUALOGON","pattern":{"operator":"and","pattern":[{"operator":"globalExpression","field":"XUALOGON","alias":"c"},{"operator":"eqProperty","field":"install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"}]}},"until":{"operator":"interval","minutes":5}}]},"displayPattern":{"operator":"followedBy","pattern":[{"operator":"every","pattern":{"operator":"filter","field":"FirstSuccessfulLogon","type":"MAEvent","name":"FIRSTSUCCESSFULLOGON","pattern":{"operator":"globalExpression","field":"XUALOGON","alias":"a"}}},{"operator":"timeWindow","minutes":5,"pattern":{"operator":"filter","field":"SubsequentSuccessfulLogon","type":"MAEvent","reusable":false,"name":"SUBSEQSUCCESSFULLOGON","pattern":{"operator":"and","pattern":[{"operator":"globalExpression","field":"XUALOGON","alias":"b"},{"operator":"eqProperty","field":"install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"},{"operator":"neqProperty","field":"audit_targetlogin","value":"FirstSuccessfulLogon.audit_targetlogin","reference":"a"}]}}},{"operator":"repeat","value":0,"pattern":{"operator":"filter","field":"AdditionalSuccessfulLogon","type":"MAEvent","reusable":false,"name":"XUALOGON","pattern":{"operator":"and","pattern":[{"operator":"globalExpression","field":"XUALOGON","alias":"c"},{"operator":"eqProperty","field":"install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"}]}},"until":{"operator":"interval","minutes":5}}]},"active":true,"published":true,"emailAlertEnabled":true,"severity":"Major","events":[{"id":"XUALOGON","name":"User Logon XUA","ref":"a","hierarchy":["every","filter","globalExpression"],"type":"event","config":{},"connectors":[]},{"id":"XUALOGON","name":"User Logon XUA","ref":"b","hierarchy":["timeWindow","filter","and"],"type":"event","config":{"timeWindow":7},"connectors":[{"operator":"eqProperty","field":"b.install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"b.session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"},{"operator":"neqProperty","field":"b.audit_targetlogin","value":"FirstSuccessfulLogon.audit_targetlogin","reference":"a"}]},{"id":"XUALOGON","name":"User Logon XUA","ref":"c","hierarchy":["repeat","filter","and"],"type":"event","config":{"until":6,"repeat":1},"connectors":[{"operator":"eqProperty","field":"c.install_systemname","value":"FirstSuccessfulLogon.install_systemname","reference":"a"},{"operator":"eqProperty","field":"c.session_ipaddress","value":"FirstSuccessfulLogon.session_ipaddress","reference":"a"}]}]}</con:request>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/pattern</con:originalUri>
+        <con:assertion type="Simple NotContains" id="89d47c13-e666-4ee0-85b3-7c56eb2821e3" name="Does Not Contain Error">
+          <con:configuration>
+            <token>error</token>
+            <ignoreCase>false</ignoreCase>
+            <useRegEx>false</useRegEx>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" id="0fcb82af-f1e7-41ef-b3ec-64775dc900aa" name="Valid HTTP Status Code = 200">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="393a1413-a823-45fc-88ef-032d54a6e013">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="33dbb577-e7fd-4a4c-9c46-d45bc164c858">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="1cf83106-e68c-4cac-8bf7-667c475a45cb">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_list_to_validate4" id="8537d3be-6863-44fd-8174-6f46755cabc7">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incident/patterns" methodName="getRulePatterns" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_list_to_validate4" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="f88a43ad-0767-40eb-b658-46d1e2c6e4f4" name="Match content of [minutes]" disabled="true">
+          <con:configuration>
+            <path>$[1]['defaultPattern']['pattern'][1]['minutes']</path>
+            <content>30</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="eeaa350b-31ab-420d-aee9-916593ffea33" name="Match content of [value]" disabled="true">
+          <con:configuration>
+            <path>$[1]['defaultPattern']['pattern'][1]['pattern']['value']</path>
+            <content>2</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="bb4b1ded-0932-477c-baa2-cf5333025f19">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -2001" id="ba2f6d42-5b83-42fc-a955-b1065e5e1efb">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="733c4fd6-fcb4-498c-b3a5-4897b3b6058f">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="confirmChangedToDefault" id="845827d7-5246-4f0a-9331-1e0e260f1747">
+    <con:settings/>
+    <con:config>
+      <script>import groovy. json.*
+import java.io.*;
+import java.util.Iterator;
+
+		//get and parse response
+		def response=context.expand('${get_list_to_validate4#Response}')		
+		def json = new JsonSlurper().parseText(response)
+		def location = testRunner.testCase.testSuite.project.getPropertyValue("ruleLocation").toInteger();
+		def ruleName = testRunner.testCase.testSuite.project.getPropertyValue("ruleName");
+		log.info(location);
+		if(!json[location]["name"].equals(ruleName)){
+			log.info("Rule name at location doesn't match expected output")
+			return false;
+		}
+		minutes = (json[location]['displayPattern']['pattern'][1]['minutes'] == 5);
+		repeatEvery = (json[location]['displayPattern']['pattern'][2]['value'] == 0);
+		repeatFor = (json[location]['displayPattern']['pattern'][2]['until']['minutes'] == 5);
+		return(minutes &amp;&amp; repeatEvery &amp;&amp; repeatFor);</script>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_rule_definitions" id="42975cc2-7bb0-4cfc-a072-52d1b22f586e">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/events/definitions" methodName="getRuleDefinitions" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_rule_definitions" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="bd94dd4a-3bac-464e-9e4b-086347a785ab" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="54c1d15a-0676-48a3-a7fc-95a00996e343">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="6c96ee68-f7c4-4352-908a-31d615d1a61c">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="6b180ed0-ad90-4db8-9265-2da4cdc4747c">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="78508778-29ac-4880-b043-a6ea7a3b348a">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_incident_graph" id="17474a3c-df09-4c92-8a71-46a4ebec5053">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incidents/graph/day" methodName="getIncidentGraph" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_incident_graph" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="bd94dd4a-3bac-464e-9e4b-086347a785ab" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="277d3a56-023e-4e98-aaf5-4590ebedd153">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="ceadacae-4596-4efb-86b3-c92a2c375e0d">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="3b9ed2ad-d3e0-4ffe-96fa-f3b1c7352926">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="2cf08421-3587-4184-9a8c-fd7a4cb93bd9">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;cleared&quot;:false,&quot;fromDate&quot;:&quot;2018-07-07T09:41:06-07:00&quot;,&quot;toDate&quot;:&quot;2018-08-07T09:41:06-07:00&quot;}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry>ruleIds</con:entry>
+          <con:entry>gridParameters</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_incident_graph_ruleid" id="02021111-6949-4760-8481-cb1d4d54e78f">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incidents/graph/day" methodName="getIncidentGraph" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_incident_graph_ruleid" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="bd94dd4a-3bac-464e-9e4b-086347a785ab" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="278bc4b1-e731-4e43-947b-97aba45e6d84">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="7be08238-2095-45f8-a764-b9e93f5dcf0c">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="b53403c4-9e29-483a-b46c-a80150f449f8">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="1832874d-f092-4d00-a908-489db29b150e">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;cleared&quot;:false,&quot;fromDate&quot;:&quot;2018-07-07T09:41:06-07:00&quot;,&quot;toDate&quot;:&quot;2018-08-07T09:41:06-07:00&quot;}"/>
+          <con:entry key="ruleIds" value="80"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry>ruleIds</con:entry>
+          <con:entry>gridParameters</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_incident_graphExpandedStandard" id="17474a3c-df09-4c92-8a71-46a4ebec5053">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incidents/graph/day?ruleIds={incidentID}&amp;" methodName="Incidents_getExpanded&amp;Standard" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_incident_graphExpandedStandard" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="bd94dd4a-3bac-464e-9e4b-086347a785ab" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="277d3a56-023e-4e98-aaf5-4590ebedd153">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="679459bb-55d8-4f1b-967d-02ddf75ff1e0">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="0e706b8d-7f75-4598-af2e-e57297cb12f4">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="c32f0d00-3473-4006-85ea-522bc000c378">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;cleared&quot;:false,&quot;fromDate&quot;:&quot;2018-07-07T09:41:06-07:00&quot;,&quot;toDate&quot;:&quot;2018-08-07T09:41:06-07:00&quot;}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry>ruleIds</con:entry>
+          <con:entry>gridParameters</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_incident_graphSplash" id="f190560f-1eef-4f1d-b708-9c9ef087c9c7">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/incidents/graph/day?ruleIds={incidentID}&amp;" methodName="Incidents_getGraphSplash" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_incident_graphSplash" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="bd94dd4a-3bac-464e-9e4b-086347a785ab" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="277d3a56-023e-4e98-aaf5-4590ebedd153">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="1443980a-abfd-4cb8-862b-c8f386411f84">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="3d1c9a6f-34cb-42d3-98de-40473d5f639d">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="67f440dd-0ec5-4fd5-a00f-c0119c8bb76c">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="gridParameters" value="{&quot;cleared&quot;:false,&quot;fromDate&quot;:&quot;2018-07-07T09:41:06-07:00&quot;,&quot;toDate&quot;:&quot;2018-08-07T09:41:06-07:00&quot;}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+          <con:entry>ruleIds</con:entry>
+          <con:entry>gridParameters</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_metadata_view_home OLGA" id="a3b85a83-7e5a-4041-9c85-ef399fdbb1c5">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/metadata/view/home" methodName="getMetadataViewHome" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_metadata_view_home OLGA" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="b2841479-3d62-41d1-9c25-306d8cd59021">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="42a3cf7e-d9df-4a8a-a4bd-f6b3db77092e" name="Match content of [0]">
+          <con:configuration>
+            <path>$['columns'][0]</path>
+            <content>selector</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="187b4643-ef7e-4256-ba72-341bc60b03f6" name="Check for existence of [dataset]">
+          <con:configuration>
+            <path>$['dataset']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="get_metadata_columns OLGA" id="d8ef6e19-ec38-42d0-967f-271e79df271b">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/xs1-security-intelligence/api/metadata/columns" methodName="getMetadataColumns" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="get_metadata_columns OLGA" id="dbdab2c9-88d0-40ac-9636-0eecdfc13fab" mediaType="application/json">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/xs1-security-intelligence/api/incident/patterns</con:originalUri>
+        <con:assertion type="JsonPath Count" id="65cff640-410c-4a00-b7ac-7f7a0e8abc17" name="Error Count = 0">
+          <con:configuration>
+            <path>$['error']</path>
+            <content>0</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="b2841479-3d62-41d1-9c25-306d8cd59021">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Match" id="5c9b85c7-fc54-42cb-b245-ba072698af0e" name="Match content of [name]">
+          <con:configuration>
+            <path>$[0]['name']</path>
+            <content>selector</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="JsonPath Existence Match" id="6ce22052-88e2-451a-ab79-3ccd27697aa3" name="Check for existence of [displayName]">
+          <con:configuration>
+            <path>$[0]['displayName']</path>
+            <content>true</content>
+            <allowWildcards>false</allowWildcards>
+            <ignoreNamspaceDifferences>false</ignoreNamspaceDifferences>
+            <ignoreComments>false</ignoreComments>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="restrequest" name="Logout" id="635210a3-a82f-48c0-8094-978a697e50e9">
+    <con:settings/>
+    <con:config service="XS1 API" resourcePath="/xs1/logout" methodName="logout" xsi:type="con:RestRequestStep" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <con:restRequest name="Logout" id="19c8389d-329a-4f2b-879f-ad35fe23942c" mediaType="application/json" postQueryString="false">
+        <con:settings>
+          <con:setting id="com.eviware.soapui.impl.wsdl.WsdlRequest@request-headers">&lt;xml-fragment/></con:setting>
+        </con:settings>
+        <con:endpoint>${#Project#endpoint}</con:endpoint>
+        <con:request/>
+        <con:originalUri>https://xs1qa2.xypro.com/xs1/login</con:originalUri>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 200" id="7c0af17e-e9d8-485d-b3c9-56f45a1c9dc9">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="940f2361-99d9-4358-99d0-060840b6134e">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Codes -200" id="b060dbf4-9312-4b24-9fa3-35fcd1479778">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:assertion type="Valid HTTP Status Codes" name="Valid HTTP Status Code = 2001" id="86a5f26d-36b6-40be-a983-7412c0844c1e">
+          <con:settings/>
+          <con:configuration>
+            <codes>200</codes>
+          </con:configuration>
+        </con:assertion>
+        <con:credentials>
+          <con:selectedAuthProfile>No Authorization</con:selectedAuthProfile>
+          <con:authType>No Authorization</con:authType>
+        </con:credentials>
+        <con:jmsConfig JMSDeliveryMode="PERSISTENT"/>
+        <con:parameters>
+          <con:entry key="Cookie" value="${#Project#cookie}"/>
+          <con:entry key="X-XSRF-TOKEN" value="${#Project#token}"/>
+        </con:parameters>
+        <con:parameterOrder>
+          <con:entry>X-XSRF-TOKEN</con:entry>
+          <con:entry>Cookie</con:entry>
+        </con:parameterOrder>
+        <con:environmentSpec>
+          <con:entry environmentId="777bd7d4-187a-4b65-ad53-e609ad31b3f5">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="0d012796-e8d5-4398-9893-f92506140f2e">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="e550e552-e905-4719-99f4-a0c68e2f48d8">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="b0ce29d2-283a-41b3-afc3-a97507050086">
+            <con:authProfile>No Authorization</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="375b6235-a7ab-438f-82f7-e243e92b9dd0">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+          <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+            <con:authProfile>Inherit From Parent</con:authProfile>
+          </con:entry>
+        </con:environmentSpec>
+      </con:restRequest>
+    </con:config>
+  </con:testStep>
+  <con:testStep type="groovy" name="outputTimesToExcel" id="5287b9b7-1131-442e-bf22-94c874a8f19f" disabled="true">
+    <con:settings/>
+    <con:config>
+      <script><![CDATA[import groovy. json.*
+import java.io.*;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.hssf.usermodel.*;
+
+
+		def projectDirectory = context.expand('${projectDir}')
+		def fileName = projectDirectory + testRunner.testCase.testSuite.project.getPropertyValue("reportsFilename")
+          log.info(fileName)
+
+		File file = new File(fileName)
+		
+		FileInputStream fsIP= new FileInputStream(file); //Read the spreadsheet that needs to be updated
+          HSSFWorkbook wb = new HSSFWorkbook(fsIP); //Access the workbook
+          HSSFSheet worksheet = wb.getSheetAt(0); //Access the worksheet, so that we can update / modify it.
+          
+		String[] steps = ["get_rule_patterns", "get_incidents_list", "get_rule_definitions", "deactivate_rule", 
+		"update_rule_severity_critical", "update_when_triggered_don't_send_an_email", "get_list_to_validate_1", "update_rule_severity_major", "update_when_triggered_send_an_email",
+		"update_rule_severity_major", "update_when_triggered_send_an_email", "restore_default_rule_param", "get_incident_graph", "get_incident_graph_ruleid",  "activate_rule",  "update_rule_params"];
+
+		//get all steps from Excel
+          HashMap<String,Integer> stepsMap=new HashMap<String,Integer>();  
+          for(int i = 1; i <= worksheet.getLastRowNum() ; i++){
+          	HSSFRow row = worksheet.getRow(i);
+			cell = row.getCell(0);
+			def stepName = cell.toString();
+			stepsMap.put(stepName,i);  		
+
+		}
+
+	
+		Cell cell = null; // declare a Cell object
+		for(int i = 0; i < steps.length; i++){
+			def currentStepName = steps[i];
+			currentStepIndex = stepsMap.get(currentStepName);
+			if (currentStepIndex!=null){
+				def currentTestStep = testRunner.testCase.testSteps[currentStepName];
+				if (currentTestStep == null){
+					log.info("NOT FOUND PROJECT STEP " + currentStepName.toString());
+				}
+				else{
+					def currentTestStepResponse = currentTestStep.testRequest.response;
+					if (currentStepIndex != null && currentTestStepResponse != null){
+						def response = currentTestStep.testRequest.response.timeTaken;
+						log.info(response)
+						HSSFRow row = worksheet.getRow(currentStepIndex);
+						cell = row.getCell(9);
+						cell.setCellValue(response);
+					}
+					else{
+						log.info("NOT FOUND TIMETAKEN FOR " + currentStepName.toString());
+					}
+				}
+			}
+			else{
+				log.info("NOT FOUND STEP IN EXCEL " + currentStepName.toString());
+			}
+		}
+			
+
+		fsIP.close(); //Close the InputStream
+		FileOutputStream output_file =new FileOutputStream(file);  //Open FileOutputStream to write updates
+          wb.write(output_file); //write changes
+          output_file.close();  //close the stream]]></script>
+    </con:config>
+  </con:testStep>
+  <con:properties/>
+  <con:reportParameters/>
+  <con:breakPoints>
+    <con:testStepId>be5c2e93-c5af-4e23-b6e7-aa800d127ef1</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>5a89dc3d-9a3a-4cf8-8a14-13ff1b68b225</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>54a352e5-d815-4fa3-a410-f6d6753910a3</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>a91228ea-c449-4eaf-92e6-1d8496441f39</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>2771a19a-5f9c-4cec-84f8-7c585221dce4</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>e7c0607f-8efd-436f-a995-6736ea0754bd</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>edd40db3-bb42-4d51-bf47-15fd9c24db5b</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>a9cf606d-2251-471e-ac6f-54f80825f57f</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>62a54609-8247-4e50-a817-a3a83280f3f3</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>0fd2668d-a46d-47cf-b8ae-3a2436f98778</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>e7b1e624-70cc-41d8-8ae5-b806bc6a9fe2</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>df27d5ec-818e-4823-bfb7-ceb80b8460d6</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>c3429ec2-a197-4ce4-94b6-318fc58c9be0</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>a1d7be79-4d18-434f-b89f-a7faa02b8630</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>d17a61e7-b093-4847-ad3e-09e3578e583e</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>e860af85-5b5f-4e9b-a0b4-3303ad93b5ea</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>f07860b6-93f4-4f99-9f4f-ebca7df48d14</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>d6eceb5a-b274-436e-afed-bde8785c6999</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>143a85e6-0563-44b5-b024-19c24dece9ef</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>013debda-1b68-4554-84cc-5fcbcdba673e</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>05172542-ba05-4a5e-8af4-8f5212e7f06a</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>bcffdd0d-a0c0-4a65-ab67-4bf742651fdf</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>2473d5a0-6c3a-4e12-b664-2a640a70fe59</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>490c4648-acc1-47b3-996b-bca2318272a7</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>8ae0520d-9624-461d-a612-a664e4c6958d</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>2bd65c99-f10a-40f6-8a2b-f711bcd5be59</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>d8fe5a29-15a0-4286-b6f4-6f78cb4b37ea</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>f329a72b-5510-4425-8004-3c72f5ccf5a2</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>1c6bc3d7-de5d-4910-be2c-69eae904aa3b</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>845827d7-5246-4f0a-9331-1e0e260f1747</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>7537440c-cbf6-48fb-843b-8f39b0617421</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>a5b4583a-dcd5-4b1d-91e5-4f1038665382</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>2b3e3757-4c4d-474e-8bf0-4808681a9d7a</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>c302ae52-e2ad-402f-9922-d4275ef1f4f8</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>046c2a7f-d904-4716-a8c2-4f796fd6d1a1</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>e534e3bd-b392-4040-8317-2d32ad929ff9</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>2cbec5fb-fd33-4560-ba9a-4a3390e079d1</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>64f1c756-d3ed-432e-82b0-a75bb5c9d932</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>4359db48-b281-4701-957e-40d79cc26c79</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>d1de8c16-2fa3-4d32-a863-29e2508e722c</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>a7c96fc1-b43b-4c8c-a11e-f4fa8077176d</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>d454f325-5ebe-4faf-9f6f-519f158db077</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>ef10fb80-3222-48a0-87f5-9c14fa8889bf</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>44e85ee6-c8b8-4946-80b8-bbd4ad22ead2</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>4adef10f-8a35-48d7-9722-c8c741f5fdf2</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>caacace4-169e-4d3c-b406-d688cb09c9a4</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>9b13fa3a-445a-46b2-b475-20de37301bd5</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>cc34efc7-988a-4cf0-9b08-da14fb308f10</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>1d764bd3-0dcf-49e5-b130-2004f69c469f</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>8537d3be-6863-44fd-8174-6f46755cabc7</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>42975cc2-7bb0-4cfc-a072-52d1b22f586e</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>650a2e23-bea3-49aa-8ced-1b16cbaf9581</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>8fd46d84-7f54-4831-a658-1820b57c3469</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>17474a3c-df09-4c92-8a71-46a4ebec5053</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>ad550355-e025-4403-a7b7-23cad8cc5d31</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>f190560f-1eef-4f1d-b708-9c9ef087c9c7</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>f4e81b7a-08f4-4e18-9ecc-f5dac4a9cdb0</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>a3b85a83-7e5a-4041-9c85-ef399fdbb1c5</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>d8ef6e19-ec38-42d0-967f-271e79df271b</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:breakPoints>
+    <con:testStepId>859d3255-f50a-4c81-ba62-e03b4d6223e8</con:testStepId>
+    <con:status>NONE</con:status>
+    <con:properties/>
+  </con:breakPoints>
+  <con:environmentSpec>
+    <con:entry environmentId="1acccb02-b4b7-4e89-ae4b-e82d2719f308">
+      <con:authProfile>Inherit From Parent</con:authProfile>
+    </con:entry>
+  </con:environmentSpec>
+</con:testCase>
